@@ -1,11 +1,11 @@
 'use client'
 
-import MapComponent from "./components/MapComponent";
-import Sidebar from "./components/Sidebar";
+import Sidebar from '../components/Sidebar'
+import MapComponent from '../components/MapComponent'
 
-export default function Home() {
+const MapPage = () => {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen w-full">
       <Sidebar />
       <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
         <div className="h-full w-full rounded-lg bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
@@ -13,5 +13,7 @@ export default function Home() {
         </div>
       </div>
     </div>
-  );
+  )
 }
+
+export default MapPage 

@@ -1,0 +1,40 @@
+{
+  "locations": [
+    {
+      "name": "Restaurant Le Petit Conakry",
+      "type": "restaurant",
+      "description": "Restaurant traditionnel avec vue sur la mer, spécialisé dans les fruits de mer et la cuisine guinéenne",
+      "address": "123 Rue de Camayenne, Conakry",
+      "phone": "+224 623 45 67 89",
+      "openingHours": "Lun-Dim 10h-23h",
+      "latitude": 9.5370,
+      "longitude": -13.6785
+     
+    },
+    {
+      "name": "Restaurant Le Petit Conakry",
+      "type": "restaurant",
+      "description": "Restaurant traditionnel avec vue sur la mer, spécialisé dans les fruits de mer et la cuisine guinéenne",
+      "address": "123 Rue de Camayenne, Conakry",
+      "phone": "+224 623 45 67 89",
+      "openingHours": "Lun-Dim 10h-23h",
+      "latitude": 9.5370,
+      "longitude": -13.6785
+     
+    },
+    {
+      "name": "Restaurant Le Petit Conakry",
+      "type": "restaurant",
+      "description": "Restaurant traditionnel avec vue sur la mer, spécialisé dans les fruits de mer et la cuisine guinéenne",
+      "address": "123 Rue de Camayenne, Conakry",
+      "phone": "+224 623 45 67 89",
+      "openingHours": "Lun-Dim 10h-23h",
+      "latitude": 9.5370,
+      "longitude": -13.6785
+     
+    }
+  
+   
+    
+  ]
+} 
