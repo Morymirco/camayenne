@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { FiMap, FiFilter, FiLayers, FiSettings, FiCheck, FiNavigation, FiHome, FiCrosshair, FiMenu, FiX } from 'react-icons/fi'
 import LocationList from './LocationList'
 import SearchBar from './SearchBar'
+import SharedLists from './SharedLists'
 import type { Location } from '@/app/types/location'
 
 type FilterOption = {
@@ -171,7 +172,7 @@ const Sidebar = () => {
           <div className="flex-1 overflow-hidden">
             <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
               <button
-                onClick={() => handleMobileClick(() => setActiveMenu('map'))}
+                onClick={() => setActiveMenu('map')}
                 className={`flex-1 py-2 text-sm font-medium ${
                   activeMenu === 'map'
                     ? 'text-blue-500 border-b-2 border-blue-500'
@@ -181,7 +182,7 @@ const Sidebar = () => {
                 Carte
               </button>
               <button
-                onClick={() => handleMobileClick(() => setActiveMenu('list'))}
+                onClick={() => setActiveMenu('list')}
                 className={`flex-1 py-2 text-sm font-medium ${
                   activeMenu === 'list'
                     ? 'text-blue-500 border-b-2 border-blue-500'
@@ -190,11 +191,23 @@ const Sidebar = () => {
               >
                 Lieux
               </button>
+              <button
+                onClick={() => setActiveMenu('shared')}
+                className={`flex-1 py-2 text-sm font-medium ${
+                  activeMenu === 'shared'
+                    ? 'text-blue-500 border-b-2 border-blue-500'
+                    : 'text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                Listes
+              </button>
             </div>
 
             <div className="overflow-y-auto h-full">
               {activeMenu === 'list' ? (
                 <LocationList />
+              ) : activeMenu === 'shared' ? (
+                <SharedLists />
               ) : (
                 <nav className="space-y-2">
                   <ul className="space-y-2">

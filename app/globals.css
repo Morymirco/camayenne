@@ -101,3 +101,33 @@ body {
 .file-upload-container:hover {
   background-color: rgba(59, 130, 246, 0.05);
 }
+
+/* Animation de pulsation pour le cercle */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+}
+
+.pulsing-circle {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Style pour le cercle principal */
+.leaflet-interactive {
+  transition: all 0.3s ease;
+}
+
+.leaflet-interactive:hover {
+  fillOpacity: 0.3;
+  cursor: pointer;
+}

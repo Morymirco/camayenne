@@ -234,6 +234,35 @@ const MapComponent = () => {
             }
           )
 
+          // Ajouter le cercle de Camayenne
+          const camayenneCenter: [number, number] = [9.5370, -13.6785]
+          const camayenneRadius = 1000 // rayon en mètres
+
+          // Cercle principal
+          L.circle(camayenneCenter, {
+            radius: camayenneRadius,
+            color: '#4A90E2',
+            fillColor: '#4A90E2',
+            fillOpacity: 0.1,
+            weight: 2,
+            dashArray: '5, 10', // Ligne pointillée
+          }).addTo(newMap)
+
+          // Cercle intérieur (effet de pulsation)
+          const pulsingCircle = L.circle(camayenneCenter, {
+            radius: camayenneRadius * 0.8,
+            color: '#4A90E2',
+            fillColor: '#4A90E2',
+            fillOpacity: 0.2,
+            weight: 1,
+            className: 'pulsing-circle'
+          }).addTo(newMap)
+
+          // Ajouter un popup au cercle
+          pulsingCircle.bindPopup('Zone de Camayenne', {
+            className: 'custom-popup'
+          })
+
           return () => {
             newMap.remove()
           }
