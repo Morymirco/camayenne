@@ -6,9 +6,10 @@ import L from 'leaflet'
 type LocationPickerProps = {
   onLocationSelect: (lat: number, lng: number) => void
   initialLocation: [number, number]
+  readOnly?: boolean
 }
 
-export default function LocationPicker({ onLocationSelect, initialLocation }: LocationPickerProps) {
+export default function LocationPicker({ onLocationSelect, initialLocation, readOnly = false }: LocationPickerProps) {
   const [marker, setMarker] = useState<L.Marker | null>(null)
 
   useEffect(() => {
@@ -39,29 +40,34 @@ export default function LocationPicker({ onLocationSelect, initialLocation }: Lo
     })
 
     // Ajouter le marqueur initial
-    const newMarker = L.marker(initialLocation, { icon: customIcon, draggable: true })
+    const newMarker = L.marker(initialLocation, { 
+      icon: customIcon, 
+      draggable: !readOnly
+    })
       .addTo(map)
-      .bindPopup('Faites glisser pour définir l\'emplacement')
+      .bindPopup(readOnly ? 'Emplacement du lieu' : 'Faites glisser pour définir l\'emplacement')
     
     setMarker(newMarker)
 
-    // Gérer le déplacement du marqueur
-    newMarker.on('dragend', () => {
-      const position = newMarker.getLatLng()
-      onLocationSelect(position.lat, position.lng)
-    })
+    if (!readOnly) {
+      // Gérer le déplacement du marqueur seulement si non readOnly
+      newMarker.on('dragend', () => {
+        const position = newMarker.getLatLng()
+        onLocationSelect(position.lat, position.lng)
+      })
 
-    // Gérer les clics sur la carte
-    map.on('click', (e) => {
-      const { lat, lng } = e.latlng
-      newMarker.setLatLng([lat, lng])
-      onLocationSelect(lat, lng)
-    })
+      // Gérer les clics sur la carte seulement si non readOnly
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng
+        newMarker.setLatLng([lat, lng])
+        onLocationSelect(lat, lng)
+      })
+    }
 
     return () => {
       map.remove()
     }
-  }, [initialLocation, onLocationSelect])
+  }, [initialLocation, onLocationSelect, readOnly])
 
   return <div id="location-picker" className="h-full w-full" />
 } 

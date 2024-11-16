@@ -1,4 +1,4 @@
-import { FiMap, FiPlus, FiList, FiSettings, FiLogOut } from 'react-icons/fi'
+import { FiMap, FiPlus, FiList, FiSettings, FiLogOut, FiUsers } from 'react-icons/fi'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -28,6 +28,15 @@ export default function AdminSidebar() {
               <Link href="/admin/locations/new" className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <FiPlus className="mr-3" />
                 Ajouter un lieu
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/admin/users" 
+                className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <FiUsers className="mr-3" />
+                Gestion des utilisateurs
               </Link>
             </li>
             <li>

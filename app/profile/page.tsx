@@ -3,21 +3,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/app/contexts/AuthContext'
 import { useAlert } from '@/app/contexts/AlertContext'
-import { FiUser, FiMail, FiPhone, FiCalendar, FiEdit2, FiCamera } from 'react-icons/fi'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { FiUser, FiMail, FiPhone, FiCalendar, FiEdit2, FiCamera, FiMapPin, FiList, FiHeart, FiStar, FiArrowLeft } from 'react-icons/fi'
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore'
 import { db, storage } from '@/app/services/firebase/config'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { updateProfile } from 'firebase/auth'
 import Image from 'next/image'
-
-type UserProfile = {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  createdAt: string
-  photoURL?: string
-}
+import type { UserProfile, UserStats } from '@/app/types/user'
+import type { SavedList } from '@/app/services/firebase/lists'
+import { useRouter } from 'next/navigation'
+import UserMessages from '@/app/components/UserMessages'
+import EditProfileForm from '@/app/components/EditProfileForm'
 
 export default function ProfilePage() {
   const { user } = useAuth()
@@ -28,6 +24,22 @@ export default function ProfilePage() {
   const [editForm, setEditForm] = useState<UserProfile | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [stats, setStats] = useState<UserStats>({
+    totalLists: 0,
+    totalFavorites: 0,
+    totalReviews: 0,
+    averageRating: 0
+  })
+  const [recentActivity, setRecentActivity] = useState<{
+    lists: SavedList[]
+    favorites: Location[]
+    reviews: any[]
+  }>({
+    lists: [],
+    favorites: [],
+    reviews: []
+  })
+  const router = useRouter()
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -50,6 +62,49 @@ export default function ProfilePage() {
 
     loadProfile()
   }, [user, showAlert])
+
+  // Charger les statistiques de l'utilisateur
+  useEffect(() => {
+    const loadUserStats = async () => {
+      if (!user) return
+
+      try {
+        // Charger les listes
+        const listsQuery = query(collection(db, 'lists'), where('userId', '==', user.uid))
+        const listsSnap = await getDocs(listsQuery)
+        
+        // Charger les favoris
+        const favorites = JSON.parse(localStorage.getItem(`favorites_${user.uid}`) || '[]')
+        
+        // Charger les avis
+        const reviewsQuery = query(collection(db, 'reviews'), where('userId', '==', user.uid))
+        const reviewsSnap = await getDocs(reviewsQuery)
+        
+        const reviews = reviewsSnap.docs.map(doc => doc.data())
+        const averageRating = reviews.length > 0
+          ? reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length
+          : 0
+
+        setStats({
+          totalLists: listsSnap.size,
+          totalFavorites: favorites.length,
+          totalReviews: reviews.length,
+          averageRating
+        })
+
+        // Charger l'activité récente
+        setRecentActivity({
+          lists: listsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SavedList[],
+          favorites: [], // À implémenter avec les données réelles
+          reviews
+        })
+      } catch (error) {
+        console.error('Erreur lors du chargement des statistiques:', error)
+      }
+    }
+
+    loadUserStats()
+  }, [user])
 
   const handleSave = async () => {
     if (!user || !editForm) return
@@ -129,157 +184,236 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-          {/* En-tête */}
-          <div className="p-6 bg-blue-500 text-white">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Mon Profil</h1>
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="flex items-center px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
-              >
-                <FiEdit2 className="mr-2" />
-                {isEditing ? 'Annuler' : 'Modifier'}
-              </button>
+      <div className="max-w-6xl mx-auto px-4 mb-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+        >
+          <FiArrowLeft className="w-5 h-5 mr-2" />
+          Retour
+        </button>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Colonne de gauche - Informations principales */}
+          {isEditing ? (
+            <div className="lg:col-span-3">
+              <EditProfileForm
+                profile={profile}
+                onUpdate={() => {
+                  setIsEditing(false)
+                  // Recharger les données du profil
+                  window.location.reload()
+                }}
+                onCancel={() => setIsEditing(false)}
+              />
             </div>
-          </div>
-
-          {/* Contenu */}
-          <div className="p-6 space-y-6">
-            {/* Photo de profil */}
-            <div className="flex justify-center">
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                  {profile?.photoURL ? (
-                    <Image
-                      src={profile.photoURL}
-                      alt="Photo de profil"
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400">
-                      <FiUser />
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={handlePhotoClick}
-                  disabled={uploadingPhoto}
-                  className="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full text-white hover:bg-blue-600 transition-colors"
-                >
-                  <FiCamera className="w-5 h-5" />
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="hidden"
-                />
-                {uploadingPhoto && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {isEditing ? (
-              // Formulaire d'édition
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Prénom
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm?.firstName}
-                      onChange={(e) => setEditForm({ ...editForm!, firstName: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Nom
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm?.lastName}
-                      onChange={(e) => setEditForm({ ...editForm!, lastName: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Téléphone
-                  </label>
-                  <input
-                    type="tel"
-                    value={editForm?.phone}
-                    onChange={(e) => setEditForm({ ...editForm!, phone: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                  >
-                    Enregistrer
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // Affichage des informations
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl">
-                    {profile.firstName.charAt(0)}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {profile.firstName} {profile.lastName}
-                    </h2>
-                    <p className="text-gray-500 dark:text-gray-400">{profile.email}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <FiPhone className="text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
-                        <p className="text-gray-900 dark:text-white">{profile.phone}</p>
+          ) : (
+            <>
+              <div className="lg:col-span-1">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                  {/* En-tête avec photo de profil */}
+                  <div className="relative h-32 bg-gradient-to-r from-blue-500 to-blue-600">
+                    {/* Image de couverture */}
+                    {profile.coverURL && (
+                      <Image
+                        src={profile.coverURL}
+                        alt="Couverture"
+                        fill
+                        className="object-cover"
+                      />
+                    )}
+                    <div className="absolute -bottom-12 left-6">
+                      <div className="relative group">
+                        <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-700">
+                          {profile?.photoURL ? (
+                            <Image
+                              src={profile.photoURL}
+                              alt="Photo de profil"
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400">
+                              <FiUser />
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={handlePhotoClick}
+                          disabled={uploadingPhoto}
+                          className="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full text-white hover:bg-blue-600 transition-colors"
+                        >
+                          <FiCamera className="w-4 h-4" />
+                        </button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoChange}
+                          className="hidden"
+                        />
                       </div>
                     </div>
+                  </div>
 
-                    <div className="flex items-center space-x-3">
-                      <FiCalendar className="text-gray-400" />
+                  {/* Informations du profil */}
+                  <div className="pt-16 px-6 pb-6">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Membre depuis</p>
-                        <p className="text-gray-900 dark:text-white">
-                          {new Date(profile.createdAt).toLocaleDateString()}
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {profile.firstName} {profile.lastName}
+                        </h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Membre depuis {new Date(profile.createdAt).toLocaleDateString()}
                         </p>
                       </div>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                      >
+                        <FiEdit2 className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Bio */}
+                    <div className="mt-6">
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {profile.bio || 'Aucune bio renseignée'}
+                      </p>
+                    </div>
+
+                    {/* Statistiques */}
+                    <div className="mt-6 grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Listes</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalLists}</p>
+                          </div>
+                          <FiList className="w-8 h-8 text-blue-500" />
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Favoris</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalFavorites}</p>
+                          </div>
+                          <FiHeart className="w-8 h-8 text-red-500" />
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Avis</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalReviews}</p>
+                          </div>
+                          <FiStar className="w-8 h-8 text-yellow-500" />
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Note moyenne</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                              {stats.averageRating.toFixed(1)}
+                            </p>
+                          </div>
+                          <div className="flex items-center">
+                            <FiStar className="w-8 h-8 text-yellow-500 fill-current" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Coordonnées */}
+                    <div className="mt-6 space-y-4">
+                      <div className="flex items-center text-gray-600 dark:text-gray-300">
+                        <FiMail className="w-5 h-5 mr-3 text-gray-400" />
+                        <span>{profile?.email}</span>
+                      </div>
+                      {profile?.phone && (
+                        <div className="flex items-center text-gray-600 dark:text-gray-300">
+                          <FiPhone className="w-5 h-5 mr-3 text-gray-400" />
+                          <span>{profile.phone}</span>
+                        </div>
+                      )}
+                      {profile?.address && (
+                        <div className="flex items-center text-gray-600 dark:text-gray-300">
+                          <FiMapPin className="w-5 h-5 mr-3 text-gray-400" />
+                          <span>{profile.address}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Colonne de droite - Activité récente et Messages */}
+              <div className="lg:col-span-2">
+                <div className="space-y-6">
+                  {/* Listes récentes */}
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                      Listes récentes
+                    </h2>
+                    <div className="space-y-4">
+                      {recentActivity.lists.slice(0, 3).map((list) => (
+                        <div key={list.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <h3 className="font-medium text-gray-900 dark:text-white">{list.name}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {list.locations.length} lieu(x)
+                            </p>
+                          </div>
+                          <FiList className="w-5 h-5 text-blue-500" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Avis récents */}
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                      Derniers avis
+                    </h2>
+                    <div className="space-y-4">
+                      {recentActivity.reviews.slice(0, 3).map((review, index) => (
+                        <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-medium text-gray-900 dark:text-white">
+                              {review.locationName}
+                            </h3>
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <FiStar
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < review.rating
+                                      ? 'text-yellow-400 fill-current'
+                                      : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{review.text}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  <UserMessages />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
