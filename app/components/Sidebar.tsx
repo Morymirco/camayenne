@@ -1,11 +1,17 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { FiMap, FiFilter, FiLayers, FiSettings, FiCheck, FiNavigation, FiHome, FiCrosshair, FiMenu, FiX } from 'react-icons/fi'
+import { useAlert } from '@/app/contexts/AlertContext'
+import { useAuth } from '@/app/contexts/AuthContext'
+import { db } from '@/app/services/firebase/config'
+import type { Location } from '@/app/types/location'
+import { doc, onSnapshot } from 'firebase/firestore'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { FiCheck, FiCrosshair, FiFilter, FiHome, FiLayers, FiLogOut, FiMap, FiMenu, FiNavigation, FiSettings, FiUser, FiX } from 'react-icons/fi'
 import LocationList from './LocationList'
 import SearchBar from './SearchBar'
 import SharedLists from './SharedLists'
-import type { Location } from '@/app/types/location'
 
 type FilterOption = {
   id: string;
@@ -18,7 +24,19 @@ type LayerOption = {
   label: string;
 }
 
+type UserProfile = {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  createdAt: string
+  photoURL?: string
+}
+
 const Sidebar = () => {
+  const { user, logout } = useAuth()
+  const { showAlert } = useAlert()
+  const router = useRouter()
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -31,6 +49,8 @@ const Sidebar = () => {
     { id: 'banques', label: 'Banques', checked: false },
   ])
   const [currentZoom, setCurrentZoom] = useState(15)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
 
   const layers: LayerOption[] = [
     { id: 'dark', label: 'Mode sombre' },
@@ -128,6 +148,31 @@ const Sidebar = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const handleLogout = async () => {
+    try {
+      await logout()
+      showAlert('Déconnexion réussie', 'success')
+    } catch (error) {
+      showAlert('Erreur lors de la déconnexion', 'error')
+    }
+  }
+
+  // Écouter les changements du profil utilisateur
+  useEffect(() => {
+    if (!user) {
+      setUserProfile(null)
+      return
+    }
+
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+      if (doc.exists()) {
+        setUserProfile(doc.data() as UserProfile)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [user])
+
   return (
     <>
       {/* Bouton hamburger pour mobile */}
@@ -154,13 +199,24 @@ const Sidebar = () => {
       <div
         className={`${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:relative w-64 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 transition-transform duration-300 ease-in-out z-50`}
+        } md:translate-x-0 fixed md:relative w-80 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 transition-transform duration-300 ease-in-out z-50`}
       >
         <div className="flex flex-col h-full">
-          {/* En-tête */}
-          <div className="mb-8">
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Camayenne</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Navigation</p>
+          {/* En-tête avec logo */}
+          <div className="mb-8 flex items-center gap-3">
+            <div className="relative w-10 h-10">
+              <Image
+                src="/logo.avif" // Assurez-vous d'ajouter votre logo dans le dossier public
+                alt="Logo Camayenne"
+                width={40}
+                height={40}
+                className="rounded-lg object-cover"
+              />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-800 dark:text-white">Camayenne</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Navigation</p>
+            </div>
           </div>
 
           {/* Barre de recherche */}
@@ -336,21 +392,86 @@ const Sidebar = () => {
             </div>
           </div>
 
-          {/* Pied de page */}
+          {/* Profil utilisateur en bas */}
           <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button 
-              onClick={() => handleMobileClick(() => toggleMenu('settings'))}
-              className={`flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg ${activeMenu === 'settings' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-            >
-              <FiSettings className="mr-3" />
-              Paramètres
-            </button>
-            {activeMenu === 'settings' && (
-              <div className="mt-2 p-4 space-y-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Version 1.0.0</p>
-                <button className="text-sm text-blue-500 hover:text-blue-600 dark:hover:text-blue-400">
-                  Déconnexion
+            {user ? (
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="w-full flex items-center space-x-3"
+                >
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-blue-500 flex items-center justify-center">
+                    {userProfile?.photoURL ? (
+                      <Image
+                        src={userProfile.photoURL}
+                        alt="Photo de profil"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-semibold">
+                        {user.displayName?.charAt(0) || user.email?.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                      {user.displayName || 'Utilisateur'}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {user.email}
+                    </p>
+                  </div>
                 </button>
+
+                {/* Menu déroulant */}
+                {showProfileMenu && (
+                  <div className="mt-3 space-y-1 border-t border-gray-200 dark:border-gray-600 pt-3">
+                    <button
+                      onClick={() => router.push('/profile')}
+                      className="w-full flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                    >
+                      <FiUser className="w-4 h-4 mr-2" />
+                      Mon profil
+                    </button>
+
+                    <button
+                      onClick={() => router.push('/settings')}
+                      className="w-full flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                    >
+                      <FiSettings className="w-4 h-4 mr-2" />
+                      Paramètres
+                    </button>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <FiLogOut className="w-4 h-4 mr-2" />
+                      Déconnexion
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-3">
+                  Connectez-vous pour accéder à toutes les fonctionnalités
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => router.push('/login')}
+                    className="flex-1 px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    Se connecter
+                  </button>
+                  <button
+                    onClick={() => router.push('/register')}
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    S'inscrire
+                  </button>
+                </div>
               </div>
             )}
           </div>

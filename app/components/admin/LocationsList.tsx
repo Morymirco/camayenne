@@ -1,26 +1,46 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { FiEdit2, FiTrash2, FiEye } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
+import { getLocations, deleteLocation } from '@/app/services/firebase/locations'
+import { useAlert } from '@/app/contexts/AlertContext'
+import type { Location } from '@/app/types/location'
 
-type Location = {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  address: string;
-  phone: string;
-  openingHours: string;
-  latitude: number;
-  longitude: number;
-  image?: string;
-}
-
-type LocationsListProps = {
-  locations: Location[];
-  isLoading: boolean;
-}
-
-export default function LocationsList({ locations, isLoading }: LocationsListProps) {
+export default function LocationsList() {
   const router = useRouter()
+  const { showAlert } = useAlert()
+  const [locations, setLocations] = useState<Location[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadLocations = async () => {
+      try {
+        const fetchedLocations = await getLocations()
+        setLocations(fetchedLocations)
+      } catch (error) {
+        console.error('Erreur lors du chargement des lieux:', error)
+        showAlert('Erreur lors du chargement des lieux', 'error')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadLocations()
+  }, [showAlert])
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lieu ?')) {
+      try {
+        await deleteLocation(id)
+        setLocations(locations.filter(loc => loc.id !== id))
+        showAlert('Lieu supprimé avec succès', 'success')
+      } catch (error) {
+        console.error('Erreur lors de la suppression:', error)
+        showAlert('Erreur lors de la suppression', 'error')
+      }
+    }
+  }
 
   if (isLoading) {
     return (
@@ -52,7 +72,7 @@ export default function LocationsList({ locations, isLoading }: LocationsListPro
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {locations.map((location) => (
-              <tr key={`location-${location.id}`}>
+              <tr key={location.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   {location.name}
                 </td>
@@ -79,7 +99,7 @@ export default function LocationsList({ locations, isLoading }: LocationsListPro
                       <FiEdit2 className="w-5 h-5" />
                     </button>
                     <button 
-                      key={`delete-${location.id}`}
+                      onClick={() => handleDelete(location.id)}
                       className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                       aria-label={`Supprimer ${location.name}`}
                     >

@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FiMail, FiLock, FiUser, FiPhone, FiAlertCircle } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthContext'
+import { registerUser, createUserProfile } from '../services/firebase/auth'
+import { useAlert } from '../contexts/AlertContext'
 
 export default function RegisterPage() {
-  const { register } = useAuth()
   const router = useRouter()
+  const { login } = useAuth()
+  const { showAlert } = useAlert()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,26 +20,45 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: ''
   })
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
-    // Validation basique
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      showAlert('Les mots de passe ne correspondent pas', 'error')
       setLoading(false)
       return
     }
 
     try {
-      await register(formData.email, formData.password, `${formData.firstName} ${formData.lastName}`)
+      const user = await registerUser(
+        formData.email, 
+        formData.password,
+        `${formData.firstName} ${formData.lastName}`
+      )
+      
+      // Créer le profil utilisateur dans Firestore
+      await createUserProfile(user.uid, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+        createdAt: new Date().toISOString()
+      })
+
+      showAlert('Inscription réussie', 'success')
+      // Connecter l'utilisateur avec les identifiants fournis
+      await login(formData.email, formData.password)
       router.push('/map')
-    } catch (error) {
-      setError('Erreur lors de l\'inscription')
+    } catch (error: any) {
+      showAlert(
+        error.code === 'auth/email-already-in-use'
+          ? 'Cet email est déjà utilisé'
+          : 'Erreur lors de l\'inscription',
+        'error'
+      )
     } finally {
       setLoading(false)
     }
@@ -51,13 +73,6 @@ export default function RegisterPage() {
             Inscrivez-vous pour accéder à l'application
           </p>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
-            <FiAlertCircle className="mr-2" />
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleRegister} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">

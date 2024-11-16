@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { FiSearch, FiX } from 'react-icons/fi'
+import { collection, query, where, getDocs, or } from 'firebase/firestore'
+import { db } from '@/app/services/firebase/config'
 import type { Location } from '@/app/types/location'
 
 type SearchBarProps = {
@@ -35,22 +37,33 @@ export default function SearchBar({ onLocationSelect }: SearchBarProps) {
 
       setIsLoading(true)
       try {
-        // Récupérer les lieux depuis le localStorage
-        const storedLocations = localStorage.getItem('locations')
-        const locations: Location[] = storedLocations ? JSON.parse(storedLocations) : []
-
-        // Filtrer les résultats
-        const filtered = locations.filter(location => {
-          const searchTerm = query.toLowerCase()
-          return (
-            location.name.toLowerCase().includes(searchTerm) ||
-            location.type.toLowerCase().includes(searchTerm) ||
-            location.address.toLowerCase().includes(searchTerm) ||
-            location.description.toLowerCase().includes(searchTerm)
+        const searchTerm = query.toLowerCase()
+        const locationsRef = collection(db, 'locations')
+        
+        // Créer une requête qui recherche dans plusieurs champs
+        const q = query(locationsRef, 
+          or(
+            where('name', '>=', searchTerm),
+            where('name', '<=', searchTerm + '\uf8ff'),
+            where('type', '>=', searchTerm),
+            where('type', '<=', searchTerm + '\uf8ff'),
+            where('address', '>=', searchTerm),
+            where('address', '<=', searchTerm + '\uf8ff')
           )
-        })
+        )
 
-        setResults(filtered)
+        const snapshot = await getDocs(q)
+        const searchResults = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Location)).filter(location => 
+          location.name.toLowerCase().includes(searchTerm) ||
+          location.type.toLowerCase().includes(searchTerm) ||
+          location.address.toLowerCase().includes(searchTerm) ||
+          location.description.toLowerCase().includes(searchTerm)
+        )
+
+        setResults(searchResults)
         setShowResults(true)
       } catch (error) {
         console.error('Erreur lors de la recherche:', error)

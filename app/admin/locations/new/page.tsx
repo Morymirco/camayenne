@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiMapPin, FiImage, FiInfo, FiPhone, FiClock, FiTag } from 'react-icons/fi'
+import { FiMapPin, FiImage, FiInfo, FiPhone, FiClock, FiTag, FiUpload, FiX } from 'react-icons/fi'
 import dynamic from 'next/dynamic'
+import { addLocation } from '@/app/services/firebase/locations'
+import { useAlert } from '@/app/contexts/AlertContext'
 
 const LocationPicker = dynamic(() => import('../../../components/admin/LocationPicker'), {
   ssr: false,
@@ -27,6 +29,8 @@ type LocationFormData = {
 
 export default function NewLocationPage() {
   const router = useRouter()
+  const { showAlert } = useAlert()
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<LocationFormData>({
     name: '',
     type: '',
@@ -37,7 +41,11 @@ export default function NewLocationPage() {
     latitude: 9.5370,
     longitude: -13.6785
   })
-  const [error, setError] = useState('')
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [galleryImages, setGalleryImages] = useState<File[]>([])
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([])
+  const coverInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
 
   const locationTypes = [
     'restaurant',
@@ -55,32 +63,56 @@ export default function NewLocationPage() {
     setFormData({ ...formData, latitude: lat, longitude: lng })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      // Récupérer les lieux existants
-      const existingLocationsStr = localStorage.getItem('locations')
-      const existingLocations = existingLocationsStr ? JSON.parse(existingLocationsStr) : []
-      
-      // Ajouter le nouveau lieu
-      const newLocation = {
-        ...formData,
-        id: Date.now(), // Générer un ID unique
-        createdAt: new Date().toISOString()
-      }
-      
-      const updatedLocations = [...existingLocations, newLocation]
-      
-      // Sauvegarder dans le localStorage
-      localStorage.setItem('locations', JSON.stringify(updatedLocations))
-      
-      // Rediriger vers la liste des lieux
-      router.push('/admin')
-    } catch (error) {
-      setError('Erreur lors de l\'ajout du lieu')
-      console.error('Erreur:', error)
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setCoverImage(file)
     }
   }
+
+  const handleGalleryImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    setGalleryImages(prev => [...prev, ...files])
+    
+    // Créer les URLs de prévisualisation
+    const newPreviews = files.map(file => URL.createObjectURL(file))
+    setGalleryPreviews(prev => [...prev, ...newPreviews])
+  }
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryImages(prev => prev.filter((_, i) => i !== index))
+    setGalleryPreviews(prev => {
+      // Libérer l'URL de prévisualisation
+      URL.revokeObjectURL(prev[index])
+      return prev.filter((_, i) => i !== index)
+    })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      // Ajouter le lieu avec l'image de couverture et la galerie
+      const newLocation = await addLocation(formData, coverImage, galleryImages)
+      showAlert('Lieu ajouté avec succès !', 'success')
+      setTimeout(() => {
+        router.push('/admin')
+      }, 1500)
+    } catch (error: any) {
+      console.error('Erreur lors de l\'ajout:', error)
+      showAlert(error.message || 'Une erreur est survenue', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Nettoyer les URLs de prévisualisation au démontage
+  useEffect(() => {
+    return () => {
+      galleryPreviews.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [])
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -88,14 +120,9 @@ export default function NewLocationPage() {
         Ajouter un nouveau lieu
       </h1>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Nom du lieu */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <FiInfo className="inline mr-2" />
@@ -110,6 +137,7 @@ export default function NewLocationPage() {
             />
           </div>
 
+          {/* Type de lieu */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <FiTag className="inline mr-2" />
@@ -130,6 +158,97 @@ export default function NewLocationPage() {
             </select>
           </div>
 
+          {/* Image de couverture */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <FiImage className="inline mr-2" />
+              Image de couverture
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+              <div className="space-y-2 text-center">
+                <div className="mx-auto h-12 w-12 text-gray-400">
+                  <FiUpload className="mx-auto h-12 w-12" />
+                </div>
+                <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                  <label className="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500">
+                    <span>Télécharger une image de couverture</span>
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverImageChange}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
+                {coverImage && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Image sélectionnée: {coverImage.name}
+                    </p>
+                    <div className="mt-2 relative h-32 w-full">
+                      <img
+                        src={URL.createObjectURL(coverImage)}
+                        alt="Prévisualisation"
+                        className="h-full w-auto mx-auto object-contain rounded-lg"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Galerie d'images */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <FiImage className="inline mr-2" />
+              Galerie d'images
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+              <div className="space-y-2 text-center">
+                <div className="mx-auto h-12 w-12 text-gray-400">
+                  <FiUpload className="mx-auto h-12 w-12" />
+                </div>
+                <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                  <label className="relative cursor-pointer rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500">
+                    <span>Ajouter des images à la galerie</span>
+                    <input
+                      ref={galleryInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleGalleryImagesChange}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Prévisualisation de la galerie */}
+            {galleryPreviews.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 gap-4">
+                {galleryPreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Image ${index + 1}`}
+                      className="h-32 w-full object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => removeGalleryImage(index)}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <FiX className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Description
@@ -143,6 +262,7 @@ export default function NewLocationPage() {
             />
           </div>
 
+          {/* Adresse */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <FiMapPin className="inline mr-2" />
@@ -157,6 +277,7 @@ export default function NewLocationPage() {
             />
           </div>
 
+          {/* Téléphone */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <FiPhone className="inline mr-2" />
@@ -171,6 +292,7 @@ export default function NewLocationPage() {
             />
           </div>
 
+          {/* Horaires */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <FiClock className="inline mr-2" />
@@ -187,7 +309,7 @@ export default function NewLocationPage() {
           </div>
         </div>
 
-        {/* Carte pour sélectionner l'emplacement */}
+        {/* Carte */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Sélectionner l'emplacement sur la carte
@@ -228,6 +350,7 @@ export default function NewLocationPage() {
           </div>
         </div>
 
+        {/* Boutons */}
         <div className="flex justify-end space-x-4">
           <button
             type="button"
@@ -238,9 +361,12 @@ export default function NewLocationPage() {
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            disabled={loading}
+            className={`px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+            }`}
           >
-            Ajouter le lieu
+            {loading ? 'Ajout en cours...' : 'Ajouter le lieu'}
           </button>
         </div>
       </form>

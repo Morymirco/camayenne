@@ -1,39 +1,88 @@
-import { 
-  collection,
+import type { Location } from '@/app/types/location'
+import {
   addDoc,
-  updateDoc,
+  collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
-  getDoc
+  arrayUnion,
+  arrayRemove
 } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 import { db, storage } from './config'
-import type { Location } from '@/app/types/location'
+import { auth } from './config'
 
 // Collection reference
 const locationsRef = collection(db, 'locations')
 
-// Add a new location
-export const addLocation = async (locationData: Omit<Location, 'id'>, image?: File) => {
+const uploadImage = async (image: File): Promise<string> => {
   try {
-    let imageUrl = ''
-    if (image) {
-      const storageRef = ref(storage, `locations/${Date.now()}_${image.name}`)
-      const snapshot = await uploadBytes(storageRef, image)
-      imageUrl = await getDownloadURL(snapshot.ref)
+    // Nettoyer le nom du fichier
+    const cleanFileName = image.name.replace(/[^a-zA-Z0-9.]/g, '_')
+    const storageRef = ref(storage, `locations/${Date.now()}_${cleanFileName}`)
+    
+    // Upload avec metadata
+    const metadata = {
+      contentType: image.type,
+      customMetadata: {
+        'uploadedBy': auth.currentUser?.uid || 'unknown'
+      }
+    }
+    
+    const snapshot = await uploadBytes(storageRef, image, metadata)
+    const downloadUrl = await getDownloadURL(snapshot.ref)
+    return downloadUrl
+  } catch (error: any) {
+    console.error('Erreur lors de l\'upload:', error)
+    if (error.code === 'storage/unauthorized') {
+      throw new Error('Vous devez être connecté pour uploader des images')
+    }
+    throw new Error('Erreur lors de l\'upload de l\'image')
+  }
+}
+
+// Add a new location
+export const addLocation = async (
+  locationData: Omit<Location, 'id'>, 
+  coverImage?: File | null,
+  galleryImages: File[] = []
+) => {
+  try {
+    let coverImageUrl = ''
+    let galleryUrls: string[] = []
+
+    // Upload de l'image de couverture
+    if (coverImage) {
+      coverImageUrl = await uploadImage(coverImage)
+    }
+
+    // Upload des images de la galerie
+    if (galleryImages.length > 0) {
+      const uploadPromises = galleryImages.map(image => uploadImage(image))
+      galleryUrls = await Promise.all(uploadPromises)
     }
 
     const docRef = await addDoc(locationsRef, {
       ...locationData,
-      image: imageUrl,
-      createdAt: new Date().toISOString()
+      image: coverImageUrl,
+      gallery: galleryUrls,
+      createdAt: new Date().toISOString(),
+      userId: auth.currentUser?.uid
     })
 
-    return { id: docRef.id, ...locationData, image: imageUrl }
+    return { 
+      id: docRef.id, 
+      ...locationData, 
+      image: coverImageUrl,
+      gallery: galleryUrls,
+      userId: auth.currentUser?.uid 
+    }
   } catch (error) {
+    console.error('Erreur lors de l\'ajout:', error)
     throw error
   }
 }
@@ -109,6 +158,88 @@ export const getLocationsByType = async (type: string) => {
       ...doc.data()
     })) as Location[]
   } catch (error) {
+    throw error
+  }
+}
+
+export const addComment = async (locationId: string, commentData: {
+  userId: string;
+  userName: string;
+  text: string;
+  rating: number;
+  createdAt: string;
+}) => {
+  try {
+    const locationRef = doc(db, 'locations', locationId)
+    const locationDoc = await getDoc(locationRef)
+    
+    if (!locationDoc.exists()) {
+      throw new Error('Location not found')
+    }
+
+    const currentComments = locationDoc.data().comments || []
+    await updateDoc(locationRef, {
+      comments: arrayUnion(commentData),
+      rating: calculateNewRating(currentComments, commentData.rating)
+    })
+
+    return commentData
+  } catch (error) {
+    console.error('Erreur lors de l\'ajout du commentaire:', error)
+    throw error
+  }
+}
+
+export const deleteComment = async (locationId: string, commentId: string) => {
+  try {
+    const locationRef = doc(db, 'locations', locationId)
+    const locationDoc = await getDoc(locationRef)
+    
+    if (!locationDoc.exists()) {
+      throw new Error('Location not found')
+    }
+
+    const comments = locationDoc.data().comments || []
+    const commentToDelete = comments.find((c: any) => c.id === commentId)
+    
+    if (!commentToDelete) {
+      throw new Error('Comment not found')
+    }
+
+    await updateDoc(locationRef, {
+      comments: arrayRemove(commentToDelete),
+      rating: calculateNewRating(
+        comments.filter((c: any) => c.id !== commentId),
+        0
+      )
+    })
+  } catch (error) {
+    console.error('Erreur lors de la suppression du commentaire:', error)
+    throw error
+  }
+}
+
+const calculateNewRating = (comments: any[], newRating: number = 0): number => {
+  if (comments.length === 0 && newRating === 0) return 0
+  
+  const totalRating = comments.reduce((sum: number, comment: any) => sum + comment.rating, 0)
+  return newRating === 0 
+    ? totalRating / comments.length 
+    : (totalRating + newRating) / (comments.length + 1)
+}
+
+export const getComments = async (locationId: string) => {
+  try {
+    const locationRef = doc(db, 'locations', locationId)
+    const locationDoc = await getDoc(locationRef)
+    
+    if (!locationDoc.exists()) {
+      throw new Error('Location not found')
+    }
+
+    return locationDoc.data().comments || []
+  } catch (error) {
+    console.error('Erreur lors de la récupération des commentaires:', error)
     throw error
   }
 } 

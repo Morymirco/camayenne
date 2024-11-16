@@ -1,11 +1,13 @@
 import {
-    auth,
-    createUserWithEmailAndPassword,
-    sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    signOut,
-    updateProfile
-} from './config'
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updateProfile,
+  User
+} from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
+import { auth, db } from './config'
 
 export const registerUser = async (email: string, password: string, name: string) => {
   try {
@@ -37,6 +39,21 @@ export const logoutUser = async () => {
 export const resetPassword = async (email: string) => {
   try {
     await sendPasswordResetEmail(auth, email)
+  } catch (error) {
+    throw error
+  }
+}
+
+export const createUserProfile = async (userId: string, data: any) => {
+  try {
+    const userRef = doc(db, 'users', userId)
+    await setDoc(userRef, {
+      ...data,
+      role: 'user',
+      favorites: [],
+      lists: [],
+      createdAt: new Date().toISOString()
+    })
   } catch (error) {
     throw error
   }

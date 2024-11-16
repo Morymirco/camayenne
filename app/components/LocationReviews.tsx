@@ -1,222 +1,180 @@
 'use client'
 
 import { useState } from 'react'
-import { FiStar, FiHeart, FiMessageSquare } from 'react-icons/fi'
+import { FiStar, FiUser, FiThumbsUp, FiThumbsDown, FiFlag } from 'react-icons/fi'
+import { FaStar } from 'react-icons/fa'
 import { useAuth } from '@/app/contexts/AuthContext'
 import { useAlert } from '@/app/contexts/AlertContext'
-import type { Comment, Location } from '@/app/types/location'
+import type { Comment } from '@/app/types/location'
 
 type LocationReviewsProps = {
-  location: Location;
-  onUpdate: (updatedLocation: Location) => void;
+  locationId: string
+  comments: Comment[]
+  onAddComment: (comment: Omit<Comment, 'id'>) => Promise<void>
 }
 
-export default function LocationReviews({ location, onUpdate }: LocationReviewsProps) {
+export default function LocationReviews({ locationId, comments, onAddComment }: LocationReviewsProps) {
   const { user } = useAuth()
   const { showAlert } = useAlert()
-  const [newComment, setNewComment] = useState('')
-  const [newRating, setNewRating] = useState(5)
-  const [showCommentForm, setShowCommentForm] = useState(false)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [rating, setRating] = useState(0)
+  const [comment, setComment] = useState('')
+  const [hoveredRating, setHoveredRating] = useState(0)
 
-  const isFavorite = user && location.favorites?.includes(user.id)
-
-  const handleAddComment = () => {
+  const handleSubmit = async () => {
     if (!user) {
-      showAlert('Veuillez vous connecter pour laisser un commentaire', 'warning')
+      showAlert('Veuillez vous connecter pour laisser un avis', 'warning')
       return
     }
 
-    if (!newComment.trim()) {
+    if (rating === 0) {
+      showAlert('Veuillez donner une note', 'warning')
+      return
+    }
+
+    if (!comment.trim()) {
       showAlert('Veuillez écrire un commentaire', 'warning')
       return
     }
 
-    const comment: Comment = {
-      id: Date.now(),
-      userId: user.id,
-      locationId: location.id,
-      text: newComment,
-      rating: newRating,
-      createdAt: new Date().toISOString(),
-      userName: user.name
+    try {
+      await onAddComment({
+        userId: user.uid,
+        userName: user.displayName || 'Anonyme',
+        locationId,
+        text: comment,
+        rating,
+        createdAt: new Date().toISOString()
+      })
+
+      setShowReviewForm(false)
+      setRating(0)
+      setComment('')
+      showAlert('Avis ajouté avec succès', 'success')
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'avis:', error)
+      showAlert('Erreur lors de l\'ajout de l\'avis', 'error')
     }
-
-    const updatedLocation = {
-      ...location,
-      comments: [...(location.comments || []), comment],
-      rating: calculateAverageRating([...(location.comments || []), comment])
-    }
-
-    // Sauvegarder dans le localStorage
-    const locations = JSON.parse(localStorage.getItem('locations') || '[]')
-    const updatedLocations = locations.map((loc: Location) => 
-      loc.id === location.id ? updatedLocation : loc
-    )
-    localStorage.setItem('locations', JSON.stringify(updatedLocations))
-
-    onUpdate(updatedLocation)
-    setNewComment('')
-    setNewRating(5)
-    setShowCommentForm(false)
-    showAlert('Commentaire ajouté avec succès', 'success')
-  }
-
-  const handleToggleFavorite = () => {
-    if (!user) {
-      showAlert('Veuillez vous connecter pour ajouter aux favoris', 'warning')
-      return
-    }
-
-    const updatedFavorites = location.favorites?.includes(user.id)
-      ? location.favorites.filter(id => id !== user.id)
-      : [...(location.favorites || []), user.id]
-
-    const updatedLocation = {
-      ...location,
-      favorites: updatedFavorites
-    }
-
-    // Sauvegarder dans le localStorage
-    const locations = JSON.parse(localStorage.getItem('locations') || '[]')
-    const updatedLocations = locations.map((loc: Location) => 
-      loc.id === location.id ? updatedLocation : loc
-    )
-    localStorage.setItem('locations', JSON.stringify(updatedLocations))
-
-    onUpdate(updatedLocation)
-    showAlert(
-      isFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris',
-      'success'
-    )
-  }
-
-  const calculateAverageRating = (comments: Comment[]) => {
-    if (!comments.length) return 0
-    const sum = comments.reduce((acc, comment) => acc + comment.rating, 0)
-    return Math.round((sum / comments.length) * 10) / 10
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            <span className="text-2xl font-bold mr-2">
-              {location.rating?.toFixed(1) || '0.0'}
-            </span>
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <FiStar
-                  key={star}
-                  className={`w-5 h-5 ${
-                    (location.rating || 0) >= star
-                      ? 'text-yellow-400 fill-current'
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          <span className="text-sm text-gray-500">
-            ({location.comments?.length || 0} avis)
-          </span>
-        </div>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Avis ({comments.length})
+        </h3>
         <button
-          onClick={handleToggleFavorite}
-          className={`p-2 rounded-full transition-colors ${
-            isFavorite
-              ? 'text-red-500 hover:bg-red-50'
-              : 'text-gray-400 hover:bg-gray-50'
-          }`}
+          onClick={() => setShowReviewForm(!showReviewForm)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
-          <FiHeart className={isFavorite ? 'fill-current' : ''} />
+          Donner mon avis
         </button>
       </div>
 
-      {/* Formulaire de commentaire */}
-      <div className="space-y-4">
-        <button
-          onClick={() => setShowCommentForm(!showCommentForm)}
-          className="flex items-center gap-2 text-blue-500 hover:text-blue-600"
-        >
-          <FiMessageSquare />
-          Laisser un avis
-        </button>
-
-        {showCommentForm && (
-          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="flex items-center gap-2">
+      {/* Formulaire d'avis */}
+      {showReviewForm && (
+        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+          <div className="flex items-center mb-4">
+            <div className="flex space-x-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
-                  onClick={() => setNewRating(star)}
-                  className={`p-1 ${
-                    newRating >= star
-                      ? 'text-yellow-400'
-                      : 'text-gray-300'
-                  }`}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  onClick={() => setRating(star)}
+                  className="text-2xl focus:outline-none transition-transform hover:scale-110"
                 >
-                  <FiStar className={newRating >= star ? 'fill-current' : ''} />
+                  {star <= (hoveredRating || rating) ? (
+                    <FaStar className="text-yellow-400" />
+                  ) : (
+                    <FiStar className="text-yellow-400" />
+                  )}
                 </button>
               ))}
             </div>
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Partagez votre expérience..."
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              rows={4}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowCommentForm(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleAddComment}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Publier
-              </button>
-            </div>
+            <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+              {rating} sur 5
+            </span>
           </div>
-        )}
-      </div>
 
-      {/* Liste des commentaires */}
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Partagez votre expérience..."
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white resize-none"
+            rows={4}
+          />
+
+          <div className="flex justify-end mt-4 space-x-2">
+            <button
+              onClick={() => setShowReviewForm(false)}
+              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Publier
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Liste des avis */}
       <div className="space-y-4">
-        {location.comments?.map((comment) => (
-          <div
-            key={comment.id}
-            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow"
-          >
+        {comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((comment) => (
+          <div key={comment.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
             <div className="flex justify-between items-start mb-2">
-              <div>
-                <p className="font-medium">{comment.userName}</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FiStar
-                        key={star}
-                        className={`w-4 h-4 ${
-                          comment.rating >= star
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                  <FiUser className="w-5 h-5" />
+                </div>
+                <div className="ml-3">
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    {comment.userName}
+                  </p>
+                  <div className="flex items-center">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar
+                          key={i}
+                          className={`w-4 h-4 ${
+                            i < comment.rating
+                              ? 'text-yellow-400'
+                              : 'text-gray-300 dark:text-gray-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </span>
                 </div>
               </div>
+              <div className="flex space-x-2">
+                <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <FiThumbsUp className="w-4 h-4" />
+                </button>
+                <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <FiThumbsDown className="w-4 h-4" />
+                </button>
+                <button className="text-gray-400 hover:text-red-500">
+                  <FiFlag className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <p className="text-gray-600 dark:text-gray-300">{comment.text}</p>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">{comment.text}</p>
           </div>
         ))}
+
+        {comments.length === 0 && (
+          <p className="text-center text-gray-500 dark:text-gray-400">
+            Aucun avis pour le moment. Soyez le premier à donner votre avis !
+          </p>
+        )}
       </div>
     </div>
   )

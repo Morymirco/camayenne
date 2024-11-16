@@ -4,25 +4,31 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi'
 import { useAuth } from '../contexts/AuthContext'
+import { useAlert } from '../contexts/AlertContext'
 
 export default function LoginPage() {
   const { login } = useAuth()
+  const { showAlert } = useAlert()
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
   })
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
     try {
       await login(credentials.email, credentials.password)
-    } catch (error) {
-      setError('Identifiants invalides')
+      showAlert('Connexion réussie', 'success')
+    } catch (error: any) {
+      showAlert(
+        error.code === 'auth/invalid-credentials' 
+          ? 'Email ou mot de passe incorrect'
+          : 'Erreur lors de la connexion',
+        'error'
+      )
     } finally {
       setLoading(false)
     }
@@ -37,13 +43,6 @@ export default function LoginPage() {
             Accédez à votre compte
           </p>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
-            <FiAlertCircle className="mr-2" />
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>

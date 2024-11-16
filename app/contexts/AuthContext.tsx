@@ -2,13 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-
-type User = {
-  id: string;
-  email: string;
-  name: string;
-  role: 'user' | 'admin';
-}
+import { User } from 'firebase/auth'
+import { loginUser, logoutUser, registerUser } from '../services/firebase/auth'
+import { auth } from '../services/firebase/config'
 
 type AuthContextType = {
   user: User | null;
@@ -28,65 +24,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Vérifier si l'utilisateur est déjà connecté
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setLoading(false)
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user)
+      setLoading(false)
+    })
+
+    return () => unsubscribe()
   }, [])
 
   const login = async (email: string, password: string) => {
     try {
-      // Simuler un appel API
-      if (email === 'admin@example.com' && password === 'admin123') {
-        const userData: User = {
-          id: '1',
-          email,
-          name: 'Admin',
-          role: 'admin'
-        }
-        setUser(userData)
-        localStorage.setItem('user', JSON.stringify(userData))
-        localStorage.setItem('token', 'fake-jwt-token')
-        router.push('/admin')
-      } else if (email === 'user@example.com' && password === 'user123') {
-        const userData: User = {
-          id: '2',
-          email,
-          name: 'User',
-          role: 'user'
-        }
-        setUser(userData)
-        localStorage.setItem('user', JSON.stringify(userData))
-        localStorage.setItem('token', 'fake-jwt-token')
-        router.push('/map')
-      } else {
-        throw new Error('Identifiants invalides')
-      }
+      const userCredential = await loginUser(email, password)
+      setUser(userCredential)
+      router.push('/map')
     } catch (error) {
       throw error
     }
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    router.push('/login')
+  const logout = async () => {
+    try {
+      await logoutUser()
+      setUser(null)
+      router.push('/login')
+    } catch (error) {
+      throw error
+    }
   }
 
   const register = async (email: string, password: string, name: string) => {
     try {
-      // Simuler un appel API
-      const userData: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        email,
-        name,
-        role: 'user'
-      }
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
-      localStorage.setItem('token', 'fake-jwt-token')
+      const userCredential = await registerUser(email, password, name)
+      setUser(userCredential)
       router.push('/map')
     } catch (error) {
       throw error
