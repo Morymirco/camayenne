@@ -121,14 +121,31 @@ export default function LocationDetails({ location, onClose }: LocationDetailsPr
     }
   }
 
-  // Utiliser l'image du lieu ou une image par défaut basée sur le type
-  const mainImage = location.image || getDefaultImage(location.type)
-  
-  // Créer un tableau d'images incluant l'image principale et les images de démonstration
-  const images = [
-    mainImage,
-    ...defaultImages.filter(img => img !== mainImage)
-  ]
+  // Fonction pour obtenir toutes les images disponibles
+  const getAllImages = () => {
+    const images: string[] = []
+    
+    // Ajouter l'image principale si elle existe
+    if (location.image) {
+      images.push(location.image)
+    }
+
+    // Ajouter les images de la galerie si elles existent
+    if (location.gallery && location.gallery.length > 0) {
+      images.push(...location.gallery)
+    }
+
+    // Si aucune image n'est disponible, utiliser les images Unsplash par défaut
+    if (images.length === 0) {
+      const mainImage = getDefaultImage(location.type)
+      images.push(mainImage)
+      images.push(...defaultImages.filter(img => img !== mainImage))
+    }
+
+    return images
+  }
+
+  const images = getAllImages()
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onClick={onClose}>
@@ -136,10 +153,10 @@ export default function LocationDetails({ location, onClose }: LocationDetailsPr
         className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide relative"
         onClick={e => e.stopPropagation()}
       >
-        {/* En-tête avec image */}
+        {/* Image principale */}
         <div className="relative h-64 w-full">
           <Image
-            src={mainImage}
+            src={images[0]}
             alt={location.name}
             fill
             className="object-cover"
@@ -210,35 +227,37 @@ export default function LocationDetails({ location, onClose }: LocationDetailsPr
           </div>
 
           {/* Galerie photos */}
-          <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <FiImage className="mr-2" />
-              Galerie photos
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {images.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
-                  onClick={() => {
-                    setCurrentImageIndex(index)
-                    setShowGallery(true)
-                  }}
-                >
-                  <Image
-                    src={image}
-                    alt={`${location.name} - Image ${index + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity" />
-                  <FiMaximize 
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  />
-                </div>
-              ))}
+          {images.length > 1 && (
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <FiImage className="mr-2" />
+                Galerie photos ({images.length})
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {images.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
+                    onClick={() => {
+                      setCurrentImageIndex(index)
+                      setShowGallery(true)
+                    }}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${location.name} - Image ${index + 1}`}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity" />
+                    <FiMaximize 
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section des avis */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
