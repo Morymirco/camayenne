@@ -4,19 +4,7 @@ import { useState, useEffect } from 'react'
 import AdminHeader from '../components/admin/AdminHeader'
 import LocationsList from '../components/admin/LocationsList'
 import ImportExportLocations from '../components/admin/ImportExportLocations'
-
-type Location = {
-  id: number
-  name: string
-  type: string
-  description: string
-  address: string
-  phone: string
-  openingHours: string
-  latitude: number
-  longitude: number
-  image?: string
-}
+import type { Location } from '@/app/types/location'
 
 export default function AdminPage() {
   const [locations, setLocations] = useState<Location[]>([])
@@ -30,8 +18,15 @@ export default function AdminPage() {
     try {
       // Charger depuis le localStorage
       const storedLocations = localStorage.getItem('locations')
-      const data = storedLocations ? JSON.parse(storedLocations) : []
-      setLocations(data)
+      if (storedLocations) {
+        const data = JSON.parse(storedLocations)
+        // Convertir les IDs en string si nécessaire
+        const formattedData = data.map((loc: any) => ({
+          ...loc,
+          id: loc.id.toString()
+        }))
+        setLocations(formattedData)
+      }
       setIsLoading(false)
     } catch (error) {
       console.error('Erreur lors du chargement des lieux:', error)
@@ -40,7 +35,12 @@ export default function AdminPage() {
   }
 
   const handleImport = (importedLocations: Location[]) => {
-    setLocations(importedLocations)
+    // S'assurer que les IDs sont des strings
+    const formattedLocations = importedLocations.map(loc => ({
+      ...loc,
+      id: loc.id.toString()
+    }))
+    setLocations(formattedLocations)
   }
 
   return (

@@ -1,11 +1,10 @@
 export type Comment = {
   id: string;
   userId: string;
-  locationId: string;
+  userName: string;
   text: string;
   rating: number;
   createdAt: string;
-  userName: string;
 }
 
 export type Location = {
@@ -19,8 +18,10 @@ export type Location = {
   latitude: number;
   longitude: number;
   image?: string;
-  gallery?: string[];
   rating?: number;
   comments?: Comment[];
   favorites?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  userId?: string;
 } 

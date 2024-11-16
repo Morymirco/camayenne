@@ -80,8 +80,9 @@ const MapComponent = () => {
             <button class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs hover:bg-blue-600 transition-colors">
               Itinéraire
             </button>
+            
             <button class="bg-gray-700 text-white px-3 py-1 rounded-full text-xs hover:bg-gray-600 transition-colors">
-              Plus d'infos
+              Voir en réalité virtuelle
             </button>
           </div>
         </div>
@@ -104,12 +105,12 @@ const MapComponent = () => {
         }
 
         // Ajouter la nouvelle couche
-        const newLayer = L.tileLayer(selectedLayer.url, {
-          attribution: selectedLayer.attribution,
-          maxZoom: 20
-        }).addTo(map)
+        // const newLayer = L.tileLayer(selectedLayer.url, {
+        //   attribution: selectedLayer.attribution,
+        //   maxZoom: 20
+        // }).addTo(map)
         
-        setCurrentLayer(newLayer)
+        // setCurrentLayer(newLayer)
       }
     }
 
