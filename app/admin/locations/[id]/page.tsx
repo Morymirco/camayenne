@@ -30,7 +30,11 @@ export default function LocationDetailPage({ params }: { params: { id: string } 
       try {
         const data = await getLocationById(params.id)
         if (data) {
-          setLocation(data)
+          const locationData: Location = {
+            ...data,
+            gallery: data.gallery || [],
+          }
+          setLocation(locationData)
         } else {
           showAlert('Lieu non trouvé', 'error')
           router.push('/admin')
