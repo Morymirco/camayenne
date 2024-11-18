@@ -32,6 +32,7 @@ export default function EditProfileForm({ profile, onUpdate, onCancel }: EditPro
   const [uploadingCover, setUploadingCover] = useState(false)
   const profilePhotoRef = useRef<HTMLInputElement>(null)
   const coverPhotoRef = useRef<HTMLInputElement>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'cover') => {
     const file = e.target.files?.[0]
@@ -82,6 +83,7 @@ export default function EditProfileForm({ profile, onUpdate, onCancel }: EditPro
     e.preventDefault()
     if (!user) return
 
+    setIsSaving(true)
     try {
       const userRef = doc(db, 'users', user.uid)
       await updateDoc(userRef, {
@@ -94,6 +96,8 @@ export default function EditProfileForm({ profile, onUpdate, onCancel }: EditPro
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error)
       showAlert('Erreur lors de la mise à jour du profil', 'error')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -238,22 +242,46 @@ export default function EditProfileForm({ profile, onUpdate, onCancel }: EditPro
           />
         </div>
 
-        <div className="flex justify-end space-x-4">
+        {/* Boutons avec indicateur de chargement */}
+        <div className="flex justify-end space-x-4 p-6">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            disabled={isSaving}
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            disabled={isSaving}
+            className="relative px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
           >
-            Enregistrer
+            {isSaving ? (
+              <>
+                <span className="opacity-0">Enregistrer</span>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              </>
+            ) : (
+              'Enregistrer'
+            )}
           </button>
         </div>
       </form>
+
+      {/* Overlay de chargement pour les photos */}
+      {(uploadingPhoto || uploadingCover) && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 flex items-center space-x-3">
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm">
+              {uploadingPhoto ? 'Mise à jour de la photo de profil...' : 'Mise à jour de la photo de couverture...'}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

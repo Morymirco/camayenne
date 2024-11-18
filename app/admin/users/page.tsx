@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FiArrowLeft, FiMail, FiMessageSquare, FiTrash2 } from 'react-icons/fi'
 import type { UserProfile } from '@/app/types/user'
+import { sendMessage } from '@/app/services/firebase/messages'
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<UserProfile[]>([])
@@ -16,6 +17,7 @@ export default function UsersManagementPage() {
   const [message, setMessage] = useState('')
   const { showAlert } = useAlert()
   const router = useRouter()
+  const [isSending, setIsSending] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -51,11 +53,20 @@ export default function UsersManagementPage() {
   }
 
   const handleSendMessage = async () => {
-    if (!selectedUser || !message.trim()) return
+    if (!selectedUser || !message.trim() || isSending) return
 
+    setIsSending(true)
     try {
-      // Envoyer le message (à implémenter selon votre système de messagerie)
-      // Par exemple, vous pouvez créer une collection 'messages' dans Firestore
+      const messageData = {
+        fromUserId: 'admin',
+        toUserId: selectedUser.id,
+        content: message,
+        createdAt: new Date().toISOString(),
+        read: false,
+        fromAdmin: true
+      }
+
+      await sendMessage(messageData)
       showAlert('Message envoyé avec succès', 'success')
       setShowMessageModal(false)
       setMessage('')
@@ -63,6 +74,8 @@ export default function UsersManagementPage() {
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error)
       showAlert('Erreur lors de l\'envoi du message', 'error')
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -207,6 +220,7 @@ export default function UsersManagementPage() {
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white resize-none"
               rows={4}
               placeholder="Votre message..."
+              disabled={isSending}
             />
             <div className="mt-4 flex justify-end space-x-2">
               <button
@@ -216,14 +230,25 @@ export default function UsersManagementPage() {
                   setSelectedUser(null)
                 }}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                disabled={isSending}
               >
                 Annuler
               </button>
               <button
                 onClick={handleSendMessage}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                disabled={isSending || !message.trim()}
+                className="relative px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Envoyer
+                {isSending ? (
+                  <>
+                    <span className="opacity-0">Envoyer</span>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  </>
+                ) : (
+                  'Envoyer'
+                )}
               </button>
             </div>
           </div>

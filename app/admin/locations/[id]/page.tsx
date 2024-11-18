@@ -1,85 +1,86 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiMapPin, FiPhone, FiClock, FiEdit2, FiTrash2 } from 'react-icons/fi'
-import dynamic from 'next/dynamic'
-import { use } from 'react'
+import { FiMapPin, FiPhone, FiClock, FiEdit2, FiTrash2, FiStar, FiMessageSquare, FiArrowLeft, FiImage } from 'react-icons/fi'
+import { getLocationById, deleteLocation } from '@/app/services/firebase/locations'
 import { useAlert } from '@/app/contexts/AlertContext'
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
+import type { Location } from '@/app/types/location'
 
-const LocationPicker = dynamic(() => import('../../../components/admin/LocationPicker'), {
+const LocationPicker = dynamic(() => import('@/app/components/admin/LocationPicker'), {
   ssr: false,
   loading: () => (
     <div className="h-[400px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
   )
 })
 
-type Location = {
-  id: number
-  name: string
-  type: string
-  description: string
-  address: string
-  phone: string
-  openingHours: string
-  latitude: number
-  longitude: number
-}
-
-export default function LocationDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params)
-  const router = useRouter()
+export default function LocationDetailPage({ params }: { params: { id: string } }) {
   const [location, setLocation] = useState<Location | null>(null)
+  const [loading, setLoading] = useState(true)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const router = useRouter()
   const { showAlert } = useAlert()
 
   useEffect(() => {
-    const fetchLocation = () => {
-      const storedLocations = localStorage.getItem('locations')
-      if (storedLocations) {
-        const locations = JSON.parse(storedLocations)
-        const location = locations.find((loc: Location) => loc.id === parseInt(resolvedParams.id))
-        if (location) {
-          setLocation(location)
+    const loadLocation = async () => {
+      try {
+        const data = await getLocationById(params.id)
+        if (data) {
+          setLocation(data)
         } else {
+          showAlert('Lieu non trouvé', 'error')
           router.push('/admin')
         }
+      } catch (error) {
+        console.error('Erreur lors du chargement:', error)
+        showAlert('Erreur lors du chargement du lieu', 'error')
+      } finally {
+        setLoading(false)
       }
     }
 
-    fetchLocation()
-  }, [resolvedParams.id, router])
+    loadLocation()
+  }, [params.id, router, showAlert])
 
-  const handleDelete = () => {
-    const storedLocations = localStorage.getItem('locations')
-    if (storedLocations) {
-      const locations = JSON.parse(storedLocations)
-      const updatedLocations = locations.filter((loc: Location) => loc.id !== parseInt(resolvedParams.id))
-      localStorage.setItem('locations', JSON.stringify(updatedLocations))
+  const handleDelete = async () => {
+    try {
+      await deleteLocation(params.id)
       showAlert('Lieu supprimé avec succès', 'success')
       router.push('/admin')
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error)
+      showAlert('Erreur lors de la suppression', 'error')
     }
   }
 
-  if (!location) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
   }
 
+  if (!location) return null
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* En-tête */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {location.name}
-        </h1>
+        <button
+          onClick={() => router.back()}
+          className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+        >
+          <FiArrowLeft className="w-5 h-5 mr-2" />
+          Retour
+        </button>
         <div className="flex gap-4">
           <button
-            onClick={() => router.push(`/admin/locations/${resolvedParams.id}/edit`)}
+            onClick={() => router.push(`/admin/locations/${params.id}/edit`)}
             className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
           >
             <FiEdit2 className="mr-2" />
@@ -95,49 +96,45 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Informations générales
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <FiMapPin className="mt-1 text-gray-400" />
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Adresse</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{location.address}</p>
-                </div>
+      {/* Contenu principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Colonne de gauche */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Image et informations de base */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div className="relative h-64">
+              <Image
+                src={location.image || '/placeholder.jpg'}
+                alt={location.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {location.name}
+              </h1>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm">
+                  {location.type}
+                </span>
+                {location.rating && (
+                  <div className="flex items-center">
+                    <FiStar className="w-4 h-4 text-yellow-400 mr-1" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {location.rating.toFixed(1)}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-start gap-3">
-                <FiPhone className="mt-1 text-gray-400" />
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Téléphone</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{location.phone}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <FiClock className="mt-1 text-gray-400" />
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Horaires</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{location.openingHours}</p>
-                </div>
-              </div>
+              <p className="text-gray-600 dark:text-gray-400">
+                {location.description}
+              </p>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Description
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              {location.description}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          {/* Carte */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Emplacement
             </h2>
@@ -148,14 +145,127 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                 readOnly
               />
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-4">
+          </div>
+
+          {/* Après la section carte, ajoutez la galerie */}
+          {location.gallery && location.gallery.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <FiImage className="mr-2" />
+                Galerie ({location.gallery.length} images)
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {location.gallery.map((imageUrl, index) => (
+                  <div key={index} className="relative aspect-square group">
+                    <Image
+                      src={imageUrl}
+                      alt={`${location.name} - Image ${index + 1}`}
+                      fill
+                      className="object-cover rounded-lg transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                      <button
+                        onClick={() => window.open(imageUrl, '_blank')}
+                        className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
+                      >
+                        Voir l'image
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ajouter un message si pas d'images */}
+          {(!location.gallery || location.gallery.length === 0) && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <FiImage className="mr-2" />
+                Galerie
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                Aucune image dans la galerie
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Colonne de droite */}
+        <div className="space-y-6">
+          {/* Informations de contact */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Informations de contact
+            </h2>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <FiMapPin className="w-5 h-5 text-gray-400 mr-3" />
+                <span className="text-gray-600 dark:text-gray-400">{location.address}</span>
+              </div>
+              {location.phone && (
+                <div className="flex items-center">
+                  <FiPhone className="w-5 h-5 text-gray-400 mr-3" />
+                  <span className="text-gray-600 dark:text-gray-400">{location.phone}</span>
+                </div>
+              )}
+              {location.openingHours && (
+                <div className="flex items-center">
+                  <FiClock className="w-5 h-5 text-gray-400 mr-3" />
+                  <span className="text-gray-600 dark:text-gray-400">{location.openingHours}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Statistiques */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Statistiques
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Avis</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {location.comments?.length || 0}
+                    </h3>
+                  </div>
+                  <FiMessageSquare className="w-6 h-6 text-blue-500" />
+                </div>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Note</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {location.rating?.toFixed(1) || '-'}
+                    </h3>
+                  </div>
+                  <FiStar className="w-6 h-6 text-yellow-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Coordonnées GPS */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Coordonnées GPS
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Latitude</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{location.latitude}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Latitude</p>
+                <p className="text-gray-900 dark:text-white font-mono">
+                  {location.latitude.toFixed(6)}
+                </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Longitude</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{location.longitude}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Longitude</p>
+                <p className="text-gray-900 dark:text-white font-mono">
+                  {location.longitude.toFixed(6)}
+                </p>
               </div>
             </div>
           </div>
@@ -175,7 +285,7 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
             <div className="flex justify-end gap-4">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 Annuler
               </button>
@@ -183,7 +293,7 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                 onClick={handleDelete}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
               >
-                Confirmer la suppression
+                Supprimer
               </button>
             </div>
           </div>

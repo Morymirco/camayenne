@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { FiMail, FiCheck, FiClock } from 'react-icons/fi'
-import { getUserMessages, Message } from '@/app/services/firebase/messages'
+import { getUserMessages, Message, markMessageAsRead } from '@/app/services/firebase/messages'
 import { useAuth } from '@/app/contexts/AuthContext'
 
 export default function UserMessages() {
@@ -14,8 +14,16 @@ export default function UserMessages() {
     const loadMessages = async () => {
       if (!user) return
       try {
+        console.log('Chargement des messages pour:', user.uid)
         const userMessages = await getUserMessages(user.uid)
+        console.log('Messages reçus:', userMessages)
         setMessages(userMessages)
+
+        userMessages.forEach(async (message) => {
+          if (!message.read) {
+            await markMessageAsRead(message.id)
+          }
+        })
       } catch (error) {
         console.error('Erreur lors du chargement des messages:', error)
       } finally {
@@ -24,6 +32,10 @@ export default function UserMessages() {
     }
 
     loadMessages()
+
+    const interval = setInterval(loadMessages, 30000)
+
+    return () => clearInterval(interval)
   }, [user])
 
   if (loading) {
@@ -75,17 +87,22 @@ export default function UserMessages() {
                 </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                   <FiClock className="mr-1" />
-                  {new Date(message.createdAt).toLocaleDateString()}
+                  {new Date(message.createdAt).toLocaleString()}
                 </span>
               </div>
-              <p className="text-gray-700 dark:text-gray-300">{message.content}</p>
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{message.content}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500 dark:text-gray-400">
-          Aucun message
-        </p>
+        <div className="text-center py-8">
+          <p className="text-gray-500 dark:text-gray-400">
+            Aucun message pour le moment
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+            Les messages de l'administrateur apparaîtront ici
+          </p>
+        </div>
       )}
     </div>
   )
