@@ -18,6 +18,7 @@ export type Location = {
   latitude: number;
   longitude: number;
   image?: string;
+  gallery?: string[];
   rating?: number;
   comments?: Comment[];
   favorites?: string[];

@@ -12,7 +12,6 @@ export default function AdminLayout({
   const router = useRouter()
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est connecté
     const isAuthenticated = localStorage.getItem('adminToken')
     if (!isAuthenticated) {
       router.push('/admin/login')
@@ -20,10 +19,12 @@ export default function AdminLayout({
   }, [router])
 
   return (
-    <div className="flex h-screen">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <AdminSidebar />
-      <main className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900">
-        {children}
+      <main className="transition-all duration-300 md:ml-64">
+        <div className="md:p-0 pt-16">
+          {children}
+        </div>
       </main>
     </div>
   )

@@ -73,73 +73,83 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <AdminHeader title="Tableau de bord" />
 
-      {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      {/* Statistiques - Responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Total des lieux</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalLocations}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.totalLocations}
+              </h3>
             </div>
-            <FiMapPin className="w-8 h-8 text-blue-500" />
+            <FiMapPin className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Utilisateurs</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalUsers}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.totalUsers}
+              </h3>
             </div>
-            <FiUsers className="w-8 h-8 text-green-500" />
+            <FiUsers className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Messages</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalMessages}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.totalMessages}
+              </h3>
             </div>
-            <FiMessageSquare className="w-8 h-8 text-yellow-500" />
+            <FiMessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Avis</p>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalReviews}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.totalReviews}
+              </h3>
             </div>
-            <FiActivity className="w-8 h-8 text-purple-500" />
+            <FiActivity className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
           </div>
         </div>
       </div>
 
-      {/* Actions rapides */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions rapides</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Actions rapides - Responsive grid */}
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Actions rapides
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <Link
             href="/admin/locations/new"
-            className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base"
           >
             <FiPlus className="mr-2" />
             Ajouter un lieu
           </Link>
           <Link
             href="/admin/users"
-            className="flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base"
           >
             <FiUsers className="mr-2" />
             Gérer les utilisateurs
           </Link>
           <Link
             href="/admin/settings"
-            className="flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            className="flex items-center justify-center px-3 sm:px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm sm:text-base"
           >
             <FiActivity className="mr-2" />
             Paramètres
@@ -148,12 +158,16 @@ export default function AdminPage() {
       </div>
 
       {/* Liste des lieux et import/export */}
-      <div className="space-y-6">
-        <ImportExportLocations
-          locations={locations}
-          onImport={handleImport}
-        />
-        <LocationsList locations={locations} isLoading={isLoading} />
+      <div className="space-y-4 sm:space-y-6">
+        <div className="overflow-x-auto">
+          <ImportExportLocations
+            locations={locations}
+            onImport={handleImport}
+          />
+        </div>
+        <div className="overflow-x-auto">
+          <LocationsList locations={locations} isLoading={isLoading} />
+        </div>
       </div>
     </div>
   )

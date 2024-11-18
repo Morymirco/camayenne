@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FiMapPin, FiPhone, FiClock, FiEdit2, FiTrash2, FiStar, FiMessageSquare, FiArrowLeft, FiImage, FiX } from 'react-icons/fi'
+import { FiMapPin, FiPhone, FiClock, FiEdit2, FiTrash2, FiStar, FiMessageSquare, FiArrowLeft, FiImage } from 'react-icons/fi'
 import { getLocationById, deleteLocation } from '@/app/services/firebase/locations'
 import { useAlert } from '@/app/contexts/AlertContext'
 import dynamic from 'next/dynamic'
@@ -22,7 +22,6 @@ export default function LocationDetailPage({ params }: { params: { id: string } 
   const [location, setLocation] = useState<Location | null>(null)
   const [loading, setLoading] = useState(true)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const router = useRouter()
   const { showAlert } = useAlert()
 
@@ -166,7 +165,7 @@ export default function LocationDetailPage({ params }: { params: { id: string } 
                     />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                       <button
-                        onClick={() => setSelectedImage(imageUrl)}
+                        onClick={() => window.open(imageUrl, '_blank')}
                         className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
                       >
                         Voir l'image
@@ -297,31 +296,6 @@ export default function LocationDetailPage({ params }: { params: { id: string } 
                 Supprimer
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal d'affichage d'image */}
-      {selectedImage && (
-        <div 
-          className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div className="relative max-w-7xl w-full max-h-[90vh] aspect-auto">
-            <Image
-              src={selectedImage}
-              alt="Image en plein écran"
-              fill
-              className="object-contain"
-              quality={100}
-              priority
-            />
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-            >
-              <FiX className="w-6 h-6" />
-            </button>
           </div>
         </div>
       )}
