@@ -104,7 +104,7 @@ const MapComponent = () => {
           map.removeLayer(currentLayer)
         }
 
-        // Ajouter la nouvelle couche
+        // // Ajouter la nouvelle couche
         // const newLayer = L.tileLayer(selectedLayer.url, {
         //   attribution: selectedLayer.attribution,
         //   maxZoom: 20
