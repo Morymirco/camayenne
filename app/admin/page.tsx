@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import AdminHeader from '../components/admin/AdminHeader'
-import LocationsList from '../components/admin/LocationsList'
-import ImportExportLocations from '../components/admin/ImportExportLocations'
-import { FiMapPin, FiUsers, FiMessageSquare, FiActivity, FiPlus } from 'react-icons/fi'
+import { db } from '@/app/services/firebase/config'
+import { collection, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '@/app/services/firebase/config'
+import { useEffect, useState } from 'react'
+import { FiActivity, FiMapPin, FiMessageSquare, FiPlus, FiUsers } from 'react-icons/fi'
+import AdminHeader from '../components/admin/AdminHeader'
+import LocationsList from '../components/admin/LocationsList'
 
 type Stats = {
   totalLocations: number
@@ -60,7 +59,7 @@ export default function AdminPage() {
         id: doc.id,
         ...doc.data()
       }))
-      setLocations(locationsData)
+      // setLocations(locationsData)
     } catch (error) {
       console.error('Erreur lors du chargement des lieux:', error)
     } finally {
@@ -68,9 +67,9 @@ export default function AdminPage() {
     }
   }
 
-  const handleImport = (importedLocations: any[]) => {
-    setLocations(importedLocations)
-  }
+  // const handleImport = (importedLocations: any[]) => {
+  //   setLocations(importedLocations)
+  // }
 
   return (
     <div className="p-4 sm:p-6">
@@ -160,10 +159,10 @@ export default function AdminPage() {
       {/* Liste des lieux et import/export */}
       <div className="space-y-4 sm:space-y-6">
         <div className="overflow-x-auto">
-          <ImportExportLocations
+          {/* <ImportExportLocations
             locations={locations}
-            onImport={handleImport}
-          />
+            // onImport={handleImport}
+          /> */}
         </div>
         <div className="overflow-x-auto">
           <LocationsList locations={locations} isLoading={isLoading} />

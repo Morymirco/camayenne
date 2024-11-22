@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { FiSend, FiMapPin, FiInfo } from 'react-icons/fi'
-import { useAuth } from '@/app/contexts/AuthContext'
 import { useAlert } from '@/app/contexts/AlertContext'
-import { addSuggestion } from '@/app/services/firebase/notifications'
+import { useAuth } from '@/app/contexts/AuthContext'
+import { useState } from 'react'
 
 type SuggestionFormProps = {
   locationId?: string
@@ -27,19 +25,19 @@ export default function SuggestionForm({ locationId, onClose }: SuggestionFormPr
       return
     }
 
-    try {
-      await addSuggestion({
-        userId: user.uid,
-        locationId,
-        ...formData
-      })
-      showAlert('Suggestion envoyée avec succès', 'success')
-      onClose()
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi de la suggestion:', error)
-      showAlert('Erreur lors de l\'envoi de la suggestion', 'error')
-    }
-  }
+  //   try {
+  //     await addSuggestion({
+  //       userId: user.uid,
+  //       locationId,
+  //       ...formData
+  //     })
+  //     showAlert('Suggestion envoyée avec succès', 'success')
+  //     onClose()
+  //   } catch (error) {
+  //     console.error('Erreur lors de l\'envoi de la suggestion:', error)
+  //     showAlert('Erreur lors de l\'envoi de la suggestion', 'error')
+  //   }
+  // }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
@@ -107,4 +105,4 @@ export default function SuggestionForm({ locationId, onClose }: SuggestionFormPr
       </form>
     </div>
   )
-} 
+}}

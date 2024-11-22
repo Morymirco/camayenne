@@ -41,7 +41,7 @@ export default function LocationReviews({ locationId, comments, onAddComment }: 
       await onAddComment({
         userId: user.uid,
         userName: user.displayName || 'Anonyme',
-        locationId,
+        // locationId,
         text: comment,
         rating,
         createdAt: new Date().toISOString()

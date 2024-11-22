@@ -63,16 +63,17 @@ export default function SharedListPage({ params }: { params: { id: string } }) {
           </h1>
 
           <div className="space-y-6">
+          
             {/* Carte avec tous les lieux */}
             <div className="h-[400px] rounded-lg overflow-hidden">
-              <LocationPicker
+              {/* <LocationPicker
                 initialLocation={[sharedList.locations[0]?.latitude || 9.5370, sharedList.locations[0]?.longitude || -13.6785]}
                 readOnly
                 markers={sharedList.locations.map(loc => ({
                   position: [loc.latitude, loc.longitude],
                   popup: loc.name
-                }))}
-              />
+                }))} */}
+              {/* /> */}
             </div>
 
             {/* Liste des lieux */}

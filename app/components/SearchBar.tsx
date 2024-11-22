@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { FiSearch, FiX, FiFilter } from 'react-icons/fi'
-import { collection, query, where, getDocs, orderBy, limit, startAt, endAt } from 'firebase/firestore'
 import { db } from '@/app/services/firebase/config'
 import type { Location } from '@/app/types/location'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { useEffect, useRef, useState } from 'react'
+import { FiFilter, FiSearch, FiX } from 'react-icons/fi'
 
 type SearchBarProps = {
   onLocationSelect: (location: Location) => void
@@ -146,9 +146,12 @@ export default function SearchBar({ onLocationSelect }: SearchBarProps) {
       searchCache.current.set(cacheKey, searchResults)
 
       if (searchCache.current.size > 100) {
-        const firstKey = searchCache.current.keys().next().value
-        searchCache.current.delete(firstKey)
+        const firstKey = searchCache.current.keys().next().value;
+        if (firstKey !== undefined) {
+          searchCache.current.delete(firstKey);
+        }
       }
+      
 
       return searchResults
     } catch (error) {
