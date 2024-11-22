@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import MapComponent from '../components/MapComponent'
 import Sidebar from '../components/Sidebar'
 import { getLocationById } from '../services/firebase/locations'
 
-export default function MapPage() {
+function MapContent() {
   const searchParams = useSearchParams()
   const locationId = searchParams.get('locationId')
   const lat = searchParams.get('lat')
@@ -43,4 +43,12 @@ export default function MapPage() {
       </div>
     </div>
   )
-} 
+}
+
+export default function MapPage() {
+  return (
+    <Suspense fallback={<div>Chargement de la carte...</div>}>
+      <MapContent />
+    </Suspense>
+  )
+}
