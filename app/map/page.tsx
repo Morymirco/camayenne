@@ -18,7 +18,6 @@ function MapContent() {
         try {
           const location = await getLocationById(locationId)
           if (location) {
-            // Émettre un événement pour centrer la carte et afficher les détails
             window.dispatchEvent(new CustomEvent('centerOnLocation', {
               detail: { lat: parseFloat(lat), lng: parseFloat(lng) }
             }))
@@ -47,7 +46,7 @@ function MapContent() {
 
 export default function MapPage() {
   return (
-    <Suspense fallback={<div>Chargement de la carte...</div>}>
+    <Suspense fallback={<div>Chargement...</div>}>
       <MapContent />
     </Suspense>
   )
