@@ -1,9 +1,8 @@
 'use client'
 
+import { getLocations } from '@/app/services/firebase/locations'
 import type { Control, Map } from 'leaflet'
 import { useEffect, useState } from 'react'
-import { getLocations } from '@/app/services/firebase/locations'
-import type { Location } from '@/app/types/location'
 
 // Déclaration pour TypeScript
 declare global {
@@ -159,27 +158,43 @@ const MapComponent = () => {
           const control = L.control.layers(baseMaps).addTo(newMap)
           setLayerControl(control)
 
-          const darkIcon = L.divIcon({
+          // Point bleu pour la position utilisateur
+          const userIcon = L.divIcon({
             className: 'custom-div-icon',
             html: `<div style="
               background-color: #4A90E2;
-              width: 12px;
-              height: 12px;
+              width: 16px;
+              height: 16px;
               border-radius: 50%;
               border: 2px solid #FFFFFF;
               box-shadow: 0 0 10px rgba(0,0,0,0.5);
             "></div>`,
-            iconSize: [12, 12],
-            iconAnchor: [6, 6]
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
           })
-          
+
+          // Fonction pour obtenir l'icône selon le type de lieu
+          const getLocationIcon = (type: string): string => {
+            const icons: { [key: string]: string } = {
+              restaurant: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`,
+              hotel: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>`,
+              pharmacie: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>`,
+              école: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
+              banque: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+              magasin: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`,
+              café: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`,
+              hôpital: `<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>`
+            }
+            return icons[type.toLowerCase()] || icons.default
+          }
+
           const userPopupContent = createCustomPopupContent(
             'Votre position',
             'Vous êtes actuellement ici',
             '/user-location.jpg'
           )
 
-          L.marker([latitude, longitude], { icon: darkIcon })
+          L.marker([latitude, longitude], { icon: userIcon })
             .addTo(newMap)
             .bindPopup(userPopupContent, {
               maxWidth: 300,
@@ -187,13 +202,32 @@ const MapComponent = () => {
             })
             .openPopup()
 
-          // Charger et ajouter les lieux depuis Firebase
+          // Charger et ajouter les lieux depuis Firebase avec des icônes personnalisées
           try {
             const firebaseLocations = await getLocations()
             console.log('Lieux chargés:', firebaseLocations)
 
             firebaseLocations.forEach(location => {
-              L.marker([location.latitude, location.longitude], { icon: darkIcon })
+              const locationIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="
+                  background-color: white;
+                  padding: 4px;
+                  border-radius: 50%;
+                  border: 2px solid #4A90E2;
+                  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 24px;
+                  height: 24px;
+                  color: #4A90E2;
+                ">${getLocationIcon(location.type)}</div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              })
+
+              L.marker([location.latitude, location.longitude], { icon: locationIcon })
                 .addTo(newMap)
                 .bindPopup(createCustomPopupContent(
                   location.name,
@@ -220,7 +254,7 @@ const MapComponent = () => {
                 '/user-location.jpg'
               )
 
-              L.marker([newLat, newLng], { icon: darkIcon })
+              L.marker([newLat, newLng], { icon: userIcon })
                 .addTo(newMap)
                 .bindPopup(updatedPopupContent, {
                   maxWidth: 300,
