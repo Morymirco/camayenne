@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { FiMail, FiLock, FiAlertCircle } from 'react-icons/fi'
-import { useAuth } from '../contexts/AuthContext'
+import { useState } from 'react'
+import { FiLock, FiMail } from 'react-icons/fi'
 import { useAlert } from '../contexts/AlertContext'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function LoginPage() {
   const { login } = useAuth()

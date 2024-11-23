@@ -2,6 +2,8 @@
 
 import type { Control, Map } from 'leaflet'
 import { useEffect, useState } from 'react'
+import { getLocations } from '@/app/services/firebase/locations'
+import type { Location } from '@/app/types/location'
 
 // Déclaration pour TypeScript
 declare global {
@@ -125,7 +127,7 @@ const MapComponent = () => {
     if (!navigator.geolocation) return
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords
         setUserLocation([latitude, longitude])
 
@@ -185,31 +187,26 @@ const MapComponent = () => {
             })
             .openPopup()
 
-          // Exemple de points d'intérêt
-          const pois = [
-            {
-              position: [latitude + 0.001, longitude + 0.001],
-              title: 'Restaurant Le Petit Conakry',
-              description: 'Restaurant traditionnel avec vue sur la mer',
-              image: '/restaurant.jpg'
-            },
-            {
-              position: [latitude - 0.001, longitude - 0.001],
-              title: 'Pharmacie Centrale',
-              description: 'Pharmacie 24/7 avec service de garde',
-              image: '/pharmacy.jpg'
-            }
-          ]
+          // Charger et ajouter les lieux depuis Firebase
+          try {
+            const firebaseLocations = await getLocations()
+            console.log('Lieux chargés:', firebaseLocations)
 
-          // Ajouter les points d'intérêt
-          pois.forEach(poi => {
-            L.marker(poi.position as [number, number], { icon: darkIcon })
-              .addTo(newMap)
-              .bindPopup(createCustomPopupContent(poi.title, poi.description, poi.image), {
-                maxWidth: 300,
-                className: 'custom-popup'
-              })
-          })
+            firebaseLocations.forEach(location => {
+              L.marker([location.latitude, location.longitude], { icon: darkIcon })
+                .addTo(newMap)
+                .bindPopup(createCustomPopupContent(
+                  location.name,
+                  location.description,
+                  location.image
+                ), {
+                  maxWidth: 300,
+                  className: 'custom-popup'
+                })
+            })
+          } catch (error) {
+            console.error('Erreur chargement des lieux:', error)
+          }
 
           navigator.geolocation.watchPosition(
             (position) => {
