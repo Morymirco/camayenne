@@ -54,11 +54,11 @@ const MapComponent = () => {
   const [followMode, setFollowMode] = useState(false)
   const [currentLayer, setCurrentLayer] = useState<L.TileLayer | null>(null)
 
-  const createCustomPopupContent = (title: string, description: string, imageUrl: string = '/location-placeholder.jpg') => {
+  const createCustomPopupContent = (title: string, description: string, imageUrl: string = '/img.jpg') => {
     return `
       <div class="custom-popup">
         <div class="popup-image">
-          <img src="/img.jpg" alt="${title}" class="w-full h-32 object-cover rounded-t-lg"/>
+          <Image src="${imageUrl}" alt="${title}" width={400} height={178} className="w-full h-32 object-cover rounded-t-lg"/>
         </div>
         <div class="p-4 bg-gray-800">
           <h3 class="text-lg font-semibold text-white mb-2">${title}</h3>
@@ -191,7 +191,7 @@ const MapComponent = () => {
           const userPopupContent = createCustomPopupContent(
             'Votre position',
             'Vous êtes actuellement ici',
-            '/user-location.jpg'
+            '/img.jpg'
           )
 
           L.marker([latitude, longitude], { icon: userIcon })
@@ -226,6 +226,7 @@ const MapComponent = () => {
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
               })
+              console.log(location.image);
 
               L.marker([location.latitude, location.longitude], { icon: locationIcon })
                 .addTo(newMap)
@@ -251,7 +252,7 @@ const MapComponent = () => {
               const updatedPopupContent = createCustomPopupContent(
                 'Position actuelle',
                 'Votre position en temps réel',
-                '/user-location.jpg'
+                '/img.jpg'
               )
 
               L.marker([newLat, newLng], { icon: userIcon })
