@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { AlertProvider } from './contexts/AlertContext';
 import { AuthProvider } from "./contexts/AuthContext";
 import "./globals.css";
+import { Inter } from 'next/font/google'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -14,6 +15,13 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  variable: '--font-inter'
+})
 
 export const metadata: Metadata = {
   title: "Camayenne - Votre guide local",

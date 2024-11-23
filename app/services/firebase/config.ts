@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, enableIndexedDbPersistence, initializeFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
@@ -17,7 +17,15 @@ const app = initializeApp(firebaseConfig)
 
 // Get Firebase services
 export const auth = getAuth(app)
-export const db = getFirestore(app)
+export const db = initializeFirestore(app, {
+  cacheSizeBytes: 50000000, // 50 MB
+  experimentalForceLongPolling: false
+})
 export const storage = getStorage(app)
+
+// Activer la persistence offline
+enableIndexedDbPersistence(db).catch((err) => {
+  console.error('Erreur persistence:', err)
+})
 
 export default app 
