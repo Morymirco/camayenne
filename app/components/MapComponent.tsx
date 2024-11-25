@@ -7,6 +7,8 @@ import 'leaflet/dist/leaflet.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { getMarkerIcon } from './MapMarkers'
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 
 // Ajouter le VRViewer
 const VRViewer = dynamic(() => import('./VRViewer'), {
@@ -54,6 +56,13 @@ const MAP_LAYERS: MapLayer[] = [
     name: 'Trafic'
   }
 ]
+
+// Ajouter cette déclaration de type pour étendre Leaflet
+declare module 'leaflet' {
+  namespace Routing {
+    function control(options: any): any;
+  }
+}
 
 export default function MapComponent() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
