@@ -1,18 +1,40 @@
 'use client'
 
+import { useState } from 'react'
 import { FiEdit2, FiTrash2, FiEye } from 'react-icons/fi'
 import Link from 'next/link'
-import type { Location } from '@/app/types/location'
+import { useLocations } from '@/app/hooks/useData'
+import { doc, deleteDoc } from 'firebase/firestore'
+import { db } from '@/app/services/firebase/config'
+import { useAlert } from '@/app/contexts/AlertContext'
 
-type LocationsListProps = {
-  locations: Location[]
-  isLoading: boolean
-}
+export default function LocationsList() {
+  const { locations, isLoading } = useLocations()
+  const { showAlert } = useAlert()
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
-export default function LocationsList({ locations, isLoading }: LocationsListProps) {
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce lieu ?')) {
+      return
+    }
+
+    setDeletingId(id)
+    try {
+      await deleteDoc(doc(db, 'locations', id))
+      showAlert('Lieu supprimé avec succès', 'success')
+      // Recharger la page pour mettre à jour la liste
+      window.location.reload()
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error)
+      showAlert('Erreur lors de la suppression', 'error')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-8">
+      <div className="flex justify-center p-8">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     )
@@ -21,8 +43,8 @@ export default function LocationsList({ locations, isLoading }: LocationsListPro
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Liste des lieux ({locations.length})
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Liste des lieux ({locations?.length || 0})
         </h2>
       </div>
 
@@ -45,7 +67,7 @@ export default function LocationsList({ locations, isLoading }: LocationsListPro
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {locations.map((location) => (
+            {locations?.map((location) => (
               <tr key={location.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -79,12 +101,11 @@ export default function LocationsList({ locations, isLoading }: LocationsListPro
                       <FiEdit2 className="w-5 h-5" />
                     </Link>
                     <button
-                      onClick={() => {
-                        if (window.confirm('Êtes-vous sûr de vouloir supprimer ce lieu ?')) {
-                          // Logique de suppression
-                        }
-                      }}
-                      className="text-red-500 hover:text-red-600"
+                      onClick={() => handleDelete(location.id)}
+                      disabled={deletingId === location.id}
+                      className={`text-red-500 hover:text-red-600 ${
+                        deletingId === location.id ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                       title="Supprimer"
                     >
                       <FiTrash2 className="w-5 h-5" />
@@ -96,7 +117,7 @@ export default function LocationsList({ locations, isLoading }: LocationsListPro
           </tbody>
         </table>
 
-        {locations.length === 0 && (
+        {!locations?.length && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             Aucun lieu trouvé
           </div>

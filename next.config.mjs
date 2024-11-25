@@ -8,15 +8,24 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'example.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+      }
     ],
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60,
   },
   swcMinify: true,
   compress: true,

@@ -8,6 +8,9 @@ import { useEffect, useState } from 'react'
 import { FiActivity, FiMapPin, FiMessageSquare, FiPlus, FiUsers } from 'react-icons/fi'
 import AdminHeader from '../components/admin/AdminHeader'
 import LocationsList from '../components/admin/LocationsList'
+import ExportLocations from '../components/admin/ExportLocations'
+import ImportLocations from '../components/admin/ImportLocations'
+import ClearLocations from '../components/admin/ClearLocations'
 
 type Stats = {
   totalLocations: number
@@ -156,17 +159,28 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Liste des lieux et import/export */}
-      <div className="space-y-4 sm:space-y-6">
-        <div className="overflow-x-auto">
-          {/* <ImportExportLocations
-            locations={locations}
-            // onImport={handleImport}
-          /> */}
+      {/* Section d'import/export */}
+      <div className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Gestion des données
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Exportez, importez ou supprimez les données des lieux
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <ImportLocations />
+            <ExportLocations />
+            <ClearLocations />
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <LocationsList locations={locations} isLoading={isLoading} />
-        </div>
+      </div>
+
+      {/* Liste des lieux */}
+      <div className="mt-6">
+        <LocationsList />
       </div>
     </div>
   )

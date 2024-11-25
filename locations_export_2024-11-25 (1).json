@@ -1,0 +1,376 @@
+[
+  {
+    "id": "31Kdd82lrMcMYNASeiEI",
+    "phone": "622999994",
+    "address": "+224622999994",
+    "longitude": -13.679,
+    "latitude": 9.533,
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F31Kdd82lrMcMYNASeiEI%2Fimages%2F1732563791041_photo-1555633514-abcee6ab92e1.avif?alt=media&token=ba6a1442-1fba-4e1f-ad9c-6965964ab8ea",
+    "updatedAt": "2024-11-25T19:43:22.588Z",
+    "type": "ecole",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "description": "École privée reconnue pour ses excellents programmes éducatifs.",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "createdAt": "2024-11-25T19:35:26.906Z",
+    "name": "École Internationale Camayenne",
+    "openingHours": "lun-ven"
+  },
+  {
+    "id": "4gKDsRqTOvAAZ3nxaIsq",
+    "updatedAt": "2024-11-25T19:45:59.688Z",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F4gKDsRqTOvAAZ3nxaIsq%2Fimages%2F1732563956497_images%20(3).jpg?alt=media&token=01b82d61-6253-4feb-9368-1a9d10cf745b",
+    "phone": "622666666",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70"
+    ],
+    "latitude": 9.525,
+    "longitude": -13.669,
+    "createdAt": "2024-11-25T19:28:31.006Z",
+    "name": "Magasin Génie Informatique",
+    "type": "magasin",
+    "description": "Fournitures et services informatiques.",
+    "openingHours": "lun-sam",
+    "address": "+224622666666",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2"
+  },
+  {
+    "id": "8ymqL8tXMwFRMPkc5nxg",
+    "description": "Hôpital offrant des services médicaux avancés.",
+    "name": "Hôpital Saint Luc Camayenne",
+    "address": "+224622999998",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992"
+    ],
+    "type": "hopital",
+    "createdAt": "2024-11-25T19:35:26.906Z",
+    "updatedAt": "2024-11-25T19:45:27.475Z",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F8ymqL8tXMwFRMPkc5nxg%2Fimages%2F1732563905644_C.H.U.M._H%C3%94PITAL_ST-LUC_%2C_BOUL._REN%C3%89-L%C3%89VESQUE%2C_MONTR%C3%89AL_-_panoramio_-_busand2003.jpg?alt=media&token=b31a22f6-8f53-4514-b899-e493d389011c",
+    "latitude": 9.535,
+    "phone": "622999998",
+    "openingHours": "24/7",
+    "longitude": -13.678,
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2"
+  },
+  {
+    "id": "9uso0odFXEKey6gZvS3b",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "phone": "625212115",
+    "longitude": -13.663799286150606,
+    "latitude": 9.538246008142375,
+    "openingHours": "lun-ven",
+    "description": "bn",
+    "name": "UNC",
+    "address": "+224625212115",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F9uso0odFXEKey6gZvS3b%2Fimages%2F1732564027196_images%20(4).jpg?alt=media&token=ad5f1190-d0aa-4cb5-a8cb-e5c6e14fc32b",
+    "createdAt": "2024-11-25T19:41:14.762Z",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "updatedAt": "2024-11-25T19:47:23.122Z",
+    "type": "ecole"
+  },
+  {
+    "id": "GlbhHshGDE1EzFgBwYQE",
+    "openingHours": "lun-ven",
+    "longitude": -13.671,
+    "updatedAt": "2024-11-25T19:33:54.172Z",
+    "latitude": 9.519,
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FGlbhHshGDE1EzFgBwYQE%2Fcover%2Fimages%20(2).jpg?alt=media&token=ed8ff9d7-736e-42b2-9164-ef0a2af0811d",
+    "createdAt": "2024-11-25T19:28:31.006Z",
+    "description": "Institution financière principale du pays.",
+    "name": "Banque Centrale de Guinée",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "type": "banque",
+    "address": "+224622555555",
+    "phone": "622555555",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2"
+  },
+  {
+    "id": "HmBsVaKciGouUku3PuRA",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28"
+    ],
+    "createdAt": "2024-11-25T19:35:26.906Z",
+    "longitude": -13.676,
+    "openingHours": "lun-dim",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FHmBsVaKciGouUku3PuRA%2Fimages%2F1732564168436_t%C3%A9l%C3%A9chargement%20(2).jpg?alt=media&token=47afd685-447d-4945-9ada-cc71417077a5",
+    "updatedAt": "2024-11-25T19:49:31.706Z",
+    "address": "+224622999997",
+    "phone": "622999997",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "name": "Café Détente Camayenne",
+    "type": "cafe",
+    "description": "Endroit idéal pour savourer un bon café.",
+    "latitude": 9.531
+  },
+  {
+    "id": "M5wKKF3i0hRLeumoDAlc",
+    "phone": "622444444",
+    "description": "Une école publique bien équipée.",
+    "type": "ecole",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992"
+    ],
+    "name": "École Primaire de Ratoma",
+    "address": "+224622444444",
+    "longitude": -13.658,
+    "openingHours": "lun-ven",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FM5wKKF3i0hRLeumoDAlc%2Fimages%2F1732564227461_images%20(5).jpg?alt=media&token=fb906b0b-c8e4-4746-ae10-2806795d9992",
+    "createdAt": "2024-11-25T19:28:31.006Z",
+    "latitude": 9.542,
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "updatedAt": "2024-11-25T19:50:31.233Z"
+  },
+  {
+    "id": "Ns5VXQrBOsrQIqLnlxOk",
+    "createdAt": "2024-11-25T19:28:31.004Z",
+    "openingHours": "lun-dim",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "description": "Cuisine locale et internationale au cœur de Conakry.",
+    "latitude": 9.548,
+    "updatedAt": "2024-11-25T19:52:36.520Z",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FNs5VXQrBOsrQIqLnlxOk%2Fimages%2F1732564354301_t%C3%A9l%C3%A9chargement%20(3).jpg?alt=media&token=976e4b67-1832-496d-8f4f-1fa5a47f62f5",
+    "type": "restaurant",
+    "phone": "622111111",
+    "name": "Restaurant Chez Moussa",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28"
+    ],
+    "longitude": -13.683,
+    "address": "+224622111111"
+  },
+  {
+    "id": "PeVaL5D5T9MSZYIrxbpt",
+    "longitude": -13.678,
+    "address": "+224622999995",
+    "openingHours": "lun-ven",
+    "description": "Agence bancaire moderne à Camayenne.",
+    "phone": "622999995",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FPeVaL5D5T9MSZYIrxbpt%2Fcover%2Fimages%20(6).jpg?alt=media&token=beca6980-5307-415f-8ed3-c5b25c4ec1bf",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "createdAt": "2024-11-25T19:35:26.906Z",
+    "latitude": 9.534,
+    "type": "banque",
+    "updatedAt": "2024-11-25T19:52:11.977Z",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28"
+    ],
+    "name": "Banque UBA Camayenne"
+  },
+  {
+    "id": "Quz17LZh9wErIoBOG6xg",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28"
+    ],
+    "name": "Restaurant Le Havre Gourmand",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "createdAt": "2024-11-25T19:35:26.905Z",
+    "latitude": 9.53,
+    "updatedAt": "2024-11-25T19:53:39.953Z",
+    "openingHours": "lun-dim",
+    "longitude": -13.681,
+    "phone": "622999991",
+    "address": "+224622999991",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FQuz17LZh9wErIoBOG6xg%2Fimages%2F1732564417147_images%20(7).jpg?alt=media&token=b7d20655-eaf3-4c19-9f2f-9f06d08184d9",
+    "description": "Cuisine gastronomique avec une touche locale.",
+    "type": "restaurant"
+  },
+  {
+    "id": "abGWPZiUX40kNXgPAOi6",
+    "updatedAt": "2024-11-25T19:55:09.153Z",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "description": "Hôtel moderne avec vue sur la plage de Camayenne.",
+    "name": "Hôtel Camayenne",
+    "openingHours": "24/7",
+    "createdAt": "2024-11-25T19:35:26.906Z",
+    "type": "hotel",
+    "phone": "622999992",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "longitude": -13.682,
+    "address": "+224622999992",
+    "latitude": 9.532,
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FabGWPZiUX40kNXgPAOi6%2Fimages%2F1732564507068_images%20(8).jpg?alt=media&token=e7c2a781-6ffe-406e-beb8-f7ee55a43c65"
+  },
+  {
+    "id": "dfVzoUGhfYmji53fDr1I",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FdfVzoUGhfYmji53fDr1I%2Fimages%2F1732564548228_images%20(9).jpg?alt=media&token=b2274413-5b7b-43cb-adfe-3147fffadce2",
+    "longitude": -13.675,
+    "phone": "622222222",
+    "updatedAt": "2024-11-25T19:55:50.472Z",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "address": "+224622222222",
+    "description": "Hôtel luxueux avec vue sur l'océan Atlantique.",
+    "type": "hotel",
+    "name": "Hôtel Noom Conakry",
+    "createdAt": "2024-11-25T19:28:31.006Z",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "openingHours": "24/7",
+    "latitude": 9.526
+  },
+  {
+    "id": "gGoHNgitdlTwAsLm0vbm",
+    "phone": "622777777",
+    "name": "Café Le Camayenne",
+    "description": "Café convivial avec une ambiance relaxante.",
+    "updatedAt": "2024-11-25T19:56:32.161Z",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28"
+    ],
+    "address": "+224622777777",
+    "latitude": 9.523,
+    "type": "cafe",
+    "longitude": -13.675,
+    "openingHours": "lun-dim",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FgGoHNgitdlTwAsLm0vbm%2Fimages%2F1732564584675_images%20(10).jpg?alt=media&token=844a3878-1e08-4fce-afc8-53d53ad2cb70",
+    "createdAt": "2024-11-25T19:28:31.007Z"
+  },
+  {
+    "id": "npvzNFyGshlrd5XhcoaW",
+    "latitude": 9.531,
+    "openingHours": "lun-sam",
+    "longitude": -13.68,
+    "updatedAt": "2024-11-25T19:57:45.386Z",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FnpvzNFyGshlrd5XhcoaW%2Fimages%2F1732564662385_unnamed%20(1).jpg?alt=media&token=52100731-4136-4766-9711-23ebfcd0415a",
+    "name": "Pharmacie de Camayenne",
+    "address": "+224622999993",
+    "description": "Pharmacie accessible et bien fournie à Camayenne.",
+    "createdAt": "2024-11-25T19:35:26.906Z",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870093_epingle_localisation_glyphe_carte_78370_1576.avif?alt=media&token=06fb8767-b6fd-44c2-9f17-10f7642db992"
+    ],
+    "type": "pharmacie",
+    "phone": "622999993"
+  },
+  {
+    "id": "oKrKTFNJgcELnhYoMJJk",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "openingHours": "24/7",
+    "name": "Hôpital Ignace Deen",
+    "latitude": 9.53,
+    "address": "+224622888888",
+    "phone": "622888888",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2FoKrKTFNJgcELnhYoMJJk%2Fimages%2F1732564713480_images%20(11).jpg?alt=media&token=cc611d37-dbaf-468d-8b6b-b796505aaaf9",
+    "longitude": -13.678,
+    "type": "hopital",
+    "description": "Centre hospitalier de référence en Guinée.",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "createdAt": "2024-11-25T19:28:31.007Z",
+    "updatedAt": "2024-11-25T19:58:35.855Z"
+  },
+  {
+    "id": "pTNcPPoi3aPTkVBlZxMA",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778868363_Capture_d__cran_2024_11_09_171953.png?alt=media&token=7afdd40e-e87f-4985-a1fd-d8cd708d7c91",
+    "phone": "622999996",
+    "type": "magasin",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870100_Screenshot_20241116_091402_ChatGPT.jpg?alt=media&token=fb9628ee-c57b-4ab6-9d30-0a2005fd9128"
+    ],
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "latitude": 9.532,
+    "description": "Supermarché avec des produits variés.",
+    "address": "+224622999996",
+    "openingHours": "lun-dim",
+    "longitude": -13.677,
+    "name": "Magasin Multiservices Camayenne",
+    "createdAt": "2024-11-25T19:35:26.906Z"
+  },
+  {
+    "id": "rHcMLSMRFMOHujOJf6Qd",
+    "rating": 5,
+    "comments": [
+      {
+        "text": "pas mal",
+        "userName": "Mory Koulibaly",
+        "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+        "rating": 5,
+        "createdAt": "2024-11-16T17:31:25.075Z"
+      }
+    ],
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731770631886_WhatsApp_Image_2024_11_15___11.07.21_103bab2c.jpg?alt=media&token=75384e64-1a6d-482b-aa36-9231db938c50",
+    "updatedAt": "2024-11-16T17:31:26.512Z",
+    "phone": "625212115",
+    "userId": "wXjABlXHIuUcQGckKoXpbkMXMT23",
+    "openingHours": "Lun-ven",
+    "type": "hotel",
+    "description": "kdpmf",
+    "createdAt": "2024-11-25T19:41:14.761Z",
+    "latitude": 9.537,
+    "longitude": -13.6785,
+    "address": "+224625212115",
+    "name": "Nimba"
+  },
+  {
+    "id": "rk3NP5TBhMIHSDF7Uwbw",
+    "updatedAt": "2024-11-25T20:00:24.255Z",
+    "name": "Pharmacie Centrale de Conakry",
+    "type": "pharmacie",
+    "createdAt": "2024-11-25T19:28:31.006Z",
+    "gallery": [
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870095_Screenshot_20241116_091450_ChatGPT.jpg?alt=media&token=3e7e8682-8b32-442d-b7fb-d4ad0ea0bd28",
+      "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2F1731778870098_Screenshot_20241116_091423_ChatGPT.jpg?alt=media&token=9acb6570-8e7b-4eb6-beb6-36eeae5def70"
+    ],
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "openingHours": "lun-sam",
+    "longitude": -13.672,
+    "description": "Une pharmacie bien équipée au centre-ville.",
+    "phone": "622333333",
+    "address": "+224622333333",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2Frk3NP5TBhMIHSDF7Uwbw%2Fimages%2F1732564822129_pcg.jpg?alt=media&token=79c9f2cf-ba5f-48e7-ab5f-ea0f5a094df1",
+    "latitude": 9.517
+  },
+  {
+    "id": "s2mrNmjHFjqpdX6QAzth",
+    "name": "Kofi",
+    "rating": 4.75,
+    "description": "une ecole",
+    "address": "+224625212115",
+    "type": "ecole",
+    "openingHours": "Lund-ven",
+    "phone": "625212115",
+    "updatedAt": "2024-11-25T19:59:34.432Z",
+    "image": "https://firebasestorage.googleapis.com/v0/b/laminuteducode.appspot.com/o/locations%2Fs2mrNmjHFjqpdX6QAzth%2Fimages%2F1732564767912_images%20(12).jpg?alt=media&token=22a76ad2-d34a-4dc1-b126-7fa69006a81d",
+    "comments": [
+      {
+        "rating": 5,
+        "createdAt": "2024-11-16T18:04:56.571Z",
+        "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+        "userName": "Mory Koulibaly",
+        "text": "une bonne universite"
+      }
+    ],
+    "latitude": 9.527106663206794,
+    "createdAt": "2024-11-25T19:41:14.759Z",
+    "userId": "J75EPjAbzFMZDIpLeMzkPPULmqP2",
+    "longitude": -13.694312095904028
+  }
+]

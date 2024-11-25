@@ -1,11 +1,12 @@
 'use client'
 
+import { getLocations } from '@/app/services/firebase/locations'
+import type { Location } from '@/app/types/location'
 import * as L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import dynamic from 'next/dynamic'
-import { useState, useEffect } from 'react'
-import { getLocations } from '@/app/services/firebase/locations'
-import type { Location } from '@/app/types/location'
+import { useEffect, useState } from 'react'
+import { getMarkerIcon } from './MapMarkers'
 
 // Ajouter le VRViewer
 const VRViewer = dynamic(() => import('./VRViewer'), {
@@ -67,11 +68,26 @@ export default function MapComponent() {
   const createCustomPopupContent = (location: any) => {
     return `
       <div class="custom-popup">
-        <div class="popup-image">
+        <div class="popup-image relative">
           <img src="${location.image || '/placeholder.jpg'}" alt="${location.name}" class="w-full h-32 object-cover rounded-t-lg"/>
+          <div class="absolute top-2 left-2">
+            <span class="px-2 py-1 bg-blue-500/80 backdrop-blur-sm text-white text-xs rounded-full">
+              ${location.type || 'Non défini'}
+            </span>
+          </div>
         </div>
         <div class="p-4 bg-gray-800">
-          <h3 class="text-lg font-semibold text-white mb-2">${location.name}</h3>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-lg font-semibold text-white">${location.name}</h3>
+            ${location.rating !== undefined ? `
+              <div class="flex items-center bg-yellow-500/80 px-2 py-1 rounded-full">
+                <svg class="w-3 h-3 text-white mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                <span class="text-white text-xs font-medium">${Number(location.rating).toFixed(1)}</span>
+              </div>
+            ` : ''}
+          </div>
           <p class="text-gray-300 text-sm mb-3">${location.description}</p>
           <div class="flex gap-2">
             <button 
@@ -92,8 +108,11 @@ export default function MapComponent() {
                   lng: ${location.longitude}
                 }
               }))'
-              class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs hover:bg-blue-600 transition-colors"
+              class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs hover:bg-blue-600 transition-colors flex items-center gap-1"
             >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+              </svg>
               Itinéraire
             </button>
           </div>
@@ -202,7 +221,9 @@ export default function MapComponent() {
           const userPopupContent = createCustomPopupContent({
             name: 'Votre position',
             description: 'Vous êtes actuellement ici',
-            image: '/img.jpg'
+            image: '/img.jpg',
+            type: 'Ici',
+            rating: null
           })
 
           L.marker([latitude, longitude], { icon: userIcon })
@@ -219,32 +240,24 @@ export default function MapComponent() {
             console.log('Lieux chargés:', firebaseLocations)
 
             firebaseLocations.forEach((location: Location) => {
-              const locationIcon = L.divIcon({
+              const icon = L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div style="
-                  background-color: white;
-                  padding: 4px;
-                  border-radius: 50%;
-                  border: 2px solid #4A90E2;
-                  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  width: 24px;
-                  height: 24px;
-                  color: #4A90E2;
-                ">${getLocationIcon(location.type)}</div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                html: getMarkerIcon(location.type),
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
               })
               console.log(location.image);
 
-              L.marker([location.latitude, location.longitude], { icon: locationIcon })
+              L.marker([location.latitude, location.longitude], { icon: icon })
                 .addTo(newMap)
                 .bindPopup(createCustomPopupContent({
                   name: location.name,
                   description: location.description,
-                  image: location.image
+                  image: location.image,
+                  type: location.type,
+                  rating: location.rating,
+                  latitude: location.latitude,
+                  longitude: location.longitude
                 }), {
                   maxWidth: 300,
                   className: 'custom-popup'
@@ -263,7 +276,9 @@ export default function MapComponent() {
               const updatedPopupContent = createCustomPopupContent({
                 name: 'Position actuelle',
                 description: 'Votre position en temps réel',
-                image: '/img.jpg'
+                image: '/img.jpg',
+                type: 'Ici',
+                rating: null
               })
 
               L.marker([newLat, newLng], { icon: userIcon })
@@ -358,7 +373,9 @@ export default function MapComponent() {
           const defaultPopupContent = createCustomPopupContent({
             name: 'Bienvenue à Camayenne',
             description: 'Point de départ de votre exploration',
-            image: '/camayenne.jpg'
+            image: '/camayenne.jpg',
+            type: 'Ici',
+            rating: null
           })
 
           L.marker(defaultLocation, { icon: darkIcon })
