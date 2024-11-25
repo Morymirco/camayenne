@@ -243,8 +243,8 @@ export default function MapComponent() {
               const icon = L.divIcon({
                 className: 'custom-div-icon',
                 html: getMarkerIcon(location.type),
-                iconSize: [16, 16],
-                iconAnchor: [8, 8]
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
               })
               console.log(location.image);
 
