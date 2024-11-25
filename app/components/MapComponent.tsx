@@ -1,8 +1,16 @@
 'use client'
 
+import * as L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import dynamic from 'next/dynamic'
+import { useState, useEffect } from 'react'
 import { getLocations } from '@/app/services/firebase/locations'
-import type { Control, Map } from 'leaflet'
-import { useEffect, useState } from 'react'
+import type { Location } from '@/app/types/location'
+
+// Ajouter le VRViewer
+const VRViewer = dynamic(() => import('./VRViewer'), {
+  ssr: false
+})
 
 // Déclaration pour TypeScript
 declare global {
@@ -46,44 +54,47 @@ const MAP_LAYERS: MapLayer[] = [
   }
 ]
 
-const MapComponent = () => {
+export default function MapComponent() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
   const [activeLayer, setActiveLayer] = useState<string>('dark')
-  const [map, setMap] = useState<Map | null>(null)
-  const [layerControl, setLayerControl] = useState<Control.Layers | null>(null)
+  const [map, setMap] = useState<L.Map | null>(null)
+  const [layerControl, setLayerControl] = useState<L.Control.Layers | null>(null)
   const [followMode, setFollowMode] = useState(false)
   const [currentLayer, setCurrentLayer] = useState<L.TileLayer | null>(null)
+  const [showVR, setShowVR] = useState(false)
+  const [currentModelUrl, setCurrentModelUrl] = useState('')
 
-  const createCustomPopupContent = (title: string, description: string, imageUrl: string = '/img.jpg') => {
+  const createCustomPopupContent = (location: any) => {
     return `
       <div class="custom-popup">
         <div class="popup-image">
-          <Image src="${imageUrl}" alt="${title}" width={400} height={178} className="w-full h-32 object-cover rounded-t-lg"/>
+          <img src="${location.image || '/placeholder.jpg'}" alt="${location.name}" class="w-full h-32 object-cover rounded-t-lg"/>
         </div>
         <div class="p-4 bg-gray-800">
-          <h3 class="text-lg font-semibold text-white mb-2">${title}</h3>
-          <p class="text-gray-300 text-sm mb-3">${description}</p>
-          <div class="flex items-center justify-between text-xs text-gray-400">
-            <span class="flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              Ouvert
-            </span>
-            <span class="flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-              </svg>
-              4.5/5
-            </span>
-          </div>
-          <div class="mt-4 flex gap-2">
-            <button class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs hover:bg-blue-600 transition-colors">
-              Itinéraire
-            </button>
-            
-            <button class="bg-gray-700 text-white px-3 py-1 rounded-full text-xs hover:bg-gray-600 transition-colors">
+          <h3 class="text-lg font-semibold text-white mb-2">${location.name}</h3>
+          <p class="text-gray-300 text-sm mb-3">${location.description}</p>
+          <div class="flex gap-2">
+            <button 
+              onclick='window.dispatchEvent(new CustomEvent("openVR", { 
+                detail: { 
+                  modelUrl: "/models/scene.glb",
+                  locationName: "${location.name}"
+                }
+              }))'
+              class="bg-gray-700 text-white px-3 py-1 rounded-full text-xs hover:bg-gray-600 transition-colors"
+            >
               Voir en réalité virtuelle
+            </button>
+            <button 
+              onclick='window.dispatchEvent(new CustomEvent("showRoute", { 
+                detail: { 
+                  lat: ${location.latitude},
+                  lng: ${location.longitude}
+                }
+              }))'
+              class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs hover:bg-blue-600 transition-colors"
+            >
+              Itinéraire
             </button>
           </div>
         </div>
@@ -106,12 +117,12 @@ const MapComponent = () => {
         }
 
         // Ajouter la nouvelle couche
-        // const newLayer = L.tileLayer(selectedLayer.url, {
-        //   attribution: selectedLayer.attribution,
-        //   maxZoom: 20
-        // }).addTo(map)
+        const newLayer = L.tileLayer(selectedLayer.url, {
+          attribution: selectedLayer.attribution,
+          maxZoom: 20
+        }).addTo(map)
         
-        // setCurrentLayer(newLayer)
+        setCurrentLayer(newLayer)
       }
     }
 
@@ -188,11 +199,11 @@ const MapComponent = () => {
             return icons[type.toLowerCase()] || icons.default
           }
 
-          const userPopupContent = createCustomPopupContent(
-            'Votre position',
-            'Vous êtes actuellement ici',
-            '/img.jpg'
-          )
+          const userPopupContent = createCustomPopupContent({
+            name: 'Votre position',
+            description: 'Vous êtes actuellement ici',
+            image: '/img.jpg'
+          })
 
           L.marker([latitude, longitude], { icon: userIcon })
             .addTo(newMap)
@@ -207,7 +218,7 @@ const MapComponent = () => {
             const firebaseLocations = await getLocations()
             console.log('Lieux chargés:', firebaseLocations)
 
-            firebaseLocations.forEach(location => {
+            firebaseLocations.forEach((location: Location) => {
               const locationIcon = L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div style="
@@ -230,11 +241,11 @@ const MapComponent = () => {
 
               L.marker([location.latitude, location.longitude], { icon: locationIcon })
                 .addTo(newMap)
-                .bindPopup(createCustomPopupContent(
-                  location.name,
-                  location.description,
-                  location.image
-                ), {
+                .bindPopup(createCustomPopupContent({
+                  name: location.name,
+                  description: location.description,
+                  image: location.image
+                }), {
                   maxWidth: 300,
                   className: 'custom-popup'
                 })
@@ -249,11 +260,11 @@ const MapComponent = () => {
               const newLng = position.coords.longitude
               newMap.setView([newLat, newLng])
               
-              const updatedPopupContent = createCustomPopupContent(
-                'Position actuelle',
-                'Votre position en temps réel',
-                '/img.jpg'
-              )
+              const updatedPopupContent = createCustomPopupContent({
+                name: 'Position actuelle',
+                description: 'Votre position en temps réel',
+                image: '/img.jpg'
+              })
 
               L.marker([newLat, newLng], { icon: userIcon })
                 .addTo(newMap)
@@ -344,11 +355,11 @@ const MapComponent = () => {
             iconAnchor: [6, 6]
           })
           
-          const defaultPopupContent = createCustomPopupContent(
-            'Bienvenue à Camayenne',
-            'Point de départ de votre exploration',
-            '/camayenne.jpg'
-          )
+          const defaultPopupContent = createCustomPopupContent({
+            name: 'Bienvenue à Camayenne',
+            description: 'Point de départ de votre exploration',
+            image: '/camayenne.jpg'
+          })
 
           L.marker(defaultLocation, { icon: darkIcon })
             .addTo(newMap)
@@ -464,6 +475,47 @@ const MapComponent = () => {
     }
   }, [map])
 
+  useEffect(() => {
+    const handleVREvent = (event: any) => {
+      setCurrentModelUrl(event.detail.modelUrl)
+      setShowVR(true)
+    }
+
+    window.addEventListener('openVR', handleVREvent)
+    return () => window.removeEventListener('openVR', handleVREvent)
+  }, [])
+
+  useEffect(() => {
+    const handleShowRoute = (event: any) => {
+      const { lat, lng } = event.detail
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const userLat = position.coords.latitude
+          const userLng = position.coords.longitude
+          
+          // Créer l'itinéraire
+          const routingControl = L.Routing.control({
+            waypoints: [
+              L.latLng(userLat, userLng),
+              L.latLng(lat, lng)
+            ],
+            routeWhileDragging: true,
+            lineOptions: {
+              styles: [{ color: '#4A90E2', weight: 4 }]
+            },
+            show: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true
+          }).addTo(map)
+        })
+      }
+    }
+
+    window.addEventListener('showRoute', handleShowRoute)
+    return () => window.removeEventListener('showRoute', handleShowRoute)
+  }, [map])
+
   return (
     <div className="relative h-full w-full">
       <div id="map" className="h-full w-full" />
@@ -474,8 +526,12 @@ const MapComponent = () => {
           </p>
         </div>
       )}
+      {showVR && (
+        <VRViewer
+          modelUrl={currentModelUrl}
+          onClose={() => setShowVR(false)}
+        />
+      )}
     </div>
   )
-}
-
-export default MapComponent 
+} 
