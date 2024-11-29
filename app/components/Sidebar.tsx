@@ -206,16 +206,16 @@ const Sidebar = () => {
           <div className="mb-8 flex items-center gap-3">
             <div className="relative w-10 h-10">
               <Image
-                src="/logo.avif" // Assurez-vous d'ajouter votre logo dans le dossier public
+                src="/logoC.png" // Assurez-vous d'ajouter votre logo dans le dossier public
                 alt="Logo Camayenne"
-                width={40}
-                height={40}
+                width={30}
+                height={30}
                 className="rounded-lg object-cover"
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800 dark:text-white">PlaceFinder</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Navigation</p>
+              <h1 className="text-xl font-bold text-gray-800 dark:text-blue-500">CamaLoc</h1>
+              <p className="text-sm text-gray-500 dark:text-red-500">Camayenne à votre portée</p>
             </div>
           </div>
 

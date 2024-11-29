@@ -4,21 +4,25 @@ import { getLocations } from '@/app/services/firebase/locations'
 import type { Location } from '@/app/types/location'
 import * as L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { getMarkerIcon } from './MapMarkers'
-import 'leaflet-routing-machine'
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 
 // Ajouter le VRViewer
 const VRViewer = dynamic(() => import('./VRViewer'), {
   ssr: false
 })
 
-// Déclaration pour TypeScript
+// Étendre le type de Leaflet pour inclure Routing
 declare global {
   interface Window {
-    L: typeof import('leaflet')
+    L: typeof L & {
+      Routing: {
+        control: (options: any) => any;
+      };
+    };
   }
 }
 
@@ -56,13 +60,6 @@ const MAP_LAYERS: MapLayer[] = [
     name: 'Trafic'
   }
 ]
-
-// Ajouter cette déclaration de type pour étendre Leaflet
-declare module 'leaflet' {
-  namespace Routing {
-    function control(options: any): any;
-  }
-}
 
 export default function MapComponent() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
@@ -519,21 +516,23 @@ export default function MapComponent() {
           const userLat = position.coords.latitude
           const userLng = position.coords.longitude
           
-          // Créer l'itinéraire
-          const routingControl = L.Routing.control({
-            waypoints: [
-              L.latLng(userLat, userLng),
-              L.latLng(lat, lng)
-            ],
-            routeWhileDragging: true,
-            lineOptions: {
-              styles: [{ color: '#4A90E2', weight: 4 }]
-            },
-            show: false,
-            addWaypoints: false,
-            draggableWaypoints: false,
-            fitSelectedRoutes: true
-          }).addTo(map)
+          if (typeof window !== 'undefined' && window.L && window.L.Routing) {
+            // Créer l'itinéraire en utilisant window.L
+            const routingControl = window.L.Routing.control({
+              waypoints: [
+                window.L.latLng(userLat, userLng),
+                window.L.latLng(lat, lng)
+              ],
+              routeWhileDragging: true,
+              lineOptions: {
+                styles: [{ color: '#4A90E2', weight: 4 }]
+              },
+              show: false,
+              addWaypoints: false,
+              draggableWaypoints: false,
+              fitSelectedRoutes: true
+            }).addTo(map)
+          }
         })
       }
     }
