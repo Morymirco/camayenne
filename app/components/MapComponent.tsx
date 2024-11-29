@@ -3,8 +3,6 @@
 import { getLocations } from '@/app/services/firebase/locations'
 import type { Location } from '@/app/types/location'
 import * as L from 'leaflet'
-import 'leaflet-routing-machine'
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet/dist/leaflet.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
@@ -15,14 +13,10 @@ const VRViewer = dynamic(() => import('./VRViewer'), {
   ssr: false
 })
 
-// Étendre le type de Leaflet pour inclure Routing
+// Déclaration pour TypeScript
 declare global {
   interface Window {
-    L: typeof L & {
-      Routing: {
-        control: (options: any) => any;
-      };
-    };
+    L: typeof import('leaflet')
   }
 }
 
@@ -516,23 +510,21 @@ export default function MapComponent() {
           const userLat = position.coords.latitude
           const userLng = position.coords.longitude
           
-          if (typeof window !== 'undefined' && window.L && window.L.Routing) {
-            // Créer l'itinéraire en utilisant window.L
-            const routingControl = window.L.Routing.control({
-              waypoints: [
-                window.L.latLng(userLat, userLng),
-                window.L.latLng(lat, lng)
-              ],
-              routeWhileDragging: true,
-              lineOptions: {
-                styles: [{ color: '#4A90E2', weight: 4 }]
-              },
-              show: false,
-              addWaypoints: false,
-              draggableWaypoints: false,
-              fitSelectedRoutes: true
-            }).addTo(map)
-          }
+          // Créer l'itinéraire
+          const routingControl = L.Routing.control({
+            waypoints: [
+              L.latLng(userLat, userLng),
+              L.latLng(lat, lng)
+            ],
+            routeWhileDragging: true,
+            lineOptions: {
+              styles: [{ color: '#4A90E2', weight: 4 }]
+            },
+            show: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true
+          }).addTo(map)
         })
       }
     }
