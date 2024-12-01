@@ -278,10 +278,10 @@ const Sidebar = () => {
                       {activeMenu === 'map' && (
                         <div className="ml-8 mt-2 space-y-2">
                           <button
-                            onClick={handleCenterOnUser}
-                            className="flex items-center w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg group"
+                            onClick={() => window.dispatchEvent(new Event('locateUser'))}
+                            className="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                           >
-                            <FiCrosshair className="mr-2" />
+                            <FiCrosshair className="w-4 h-4 mr-2" />
                             Ma position
                           </button>
                           <button
@@ -298,25 +298,6 @@ const Sidebar = () => {
                             <FiNavigation className="mr-2" />
                             Mode suivi
                           </button>
-                          <div className="px-3 py-2">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Zoom actuel: {currentZoom}x
-                            </p>
-                            <div className="mt-2 flex gap-2">
-                              <button
-                                onClick={() => window.dispatchEvent(new CustomEvent('zoomIn'))}
-                                className="flex-1 px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                              >
-                                Zoom +
-                              </button>
-                              <button
-                                onClick={() => window.dispatchEvent(new CustomEvent('zoomOut'))}
-                                className="flex-1 px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                              >
-                                Zoom -
-                              </button>
-                            </div>
-                          </div>
                         </div>
                       )}
                     </li>
