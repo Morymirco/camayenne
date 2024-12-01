@@ -41,6 +41,34 @@ const getDefaultImage = (type: string): string => {
   }
 }
 
+// D'abord, créons le composant Skeleton
+const LocationSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="relative bg-gray-200 dark:bg-gray-700 h-48 rounded-t-lg overflow-hidden">
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+    </div>
+    <div className="p-3 space-y-3">
+      <div className="flex justify-between items-start">
+        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-12" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+      </div>
+      <div className="pt-2 mt-2 border-t border-gray-100 dark:border-gray-700 flex gap-2">
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded flex-1" />
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded flex-1" />
+      </div>
+    </div>
+  </div>
+);
+
 export default function LocationList() {
   const { user } = useAuth()
   const { showAlert } = useAlert()
@@ -181,8 +209,15 @@ export default function LocationList() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900 dark:border-gray-100"></div>
+      <div className="space-y-4">
+        {/* Afficher plusieurs skeletons pendant le chargement */}
+        <div className="space-y-4">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+              <LocationSkeleton />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -306,17 +341,19 @@ export default function LocationList() {
             {/* Boutons d'action */}
             <div className="flex gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
               <button 
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   window.dispatchEvent(new CustomEvent('centerOnLocation', {
                     detail: {
                       lat: location.latitude,
-                      lng: location.longitude
+                      lng: location.longitude,
+                      showPopup: true
                     }
                   }))
                 }}
-                className="flex items-center px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                className="flex-1 flex items-center justify-center px-2 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
               >
-                <FiMap className="w-4 h-4 mr-1" />
+                <FiMapPin className="w-3 h-3 mr-1" />
                 Voir sur la carte
               </button>
               <button

@@ -202,31 +202,27 @@ const Sidebar = () => {
         } md:translate-x-0 fixed md:relative w-80 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 transition-transform duration-300 ease-in-out z-50`}
       >
         <div className="flex flex-col h-full">
-          {/* En-tête avec logo */}
-          <div className="mb-8 flex items-center gap-3">
-            <div className="relative w-10 h-10">
+          {/* En-tête avec logo - réduire les marges */}
+          <div className="flex flex-col items-center justify-center p-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="relative w-40 h-16">
               <Image
-                src="/logoC.png" // Assurez-vous d'ajouter votre logo dans le dossier public
-                alt="Logo Camayenne"
-                width={30}
-                height={30}
-                className="rounded-lg object-cover"
+                src="/logof.png"
+                alt="Logo GéoCamayenne"
+                fill
+                className="object-contain"
+                priority
               />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800 dark:text-blue-500">CamaLoc</h1>
-              <p className="text-sm text-gray-500 dark:text-red-500">Camayenne à votre portée</p>
             </div>
           </div>
 
-          {/* Barre de recherche */}
-          <div className="mb-6">
+          {/* Barre de recherche - réduire la marge */}
+          <div className="mb-3">
             <SearchBar onLocationSelect={(location) => handleMobileClick(() => handleLocationSelect(location))} />
           </div>
 
-          {/* Menu principal avec onglets */}
+          {/* Menu principal avec onglets - réduire la marge */}
           <div className="flex-1 overflow-hidden">
-            <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+            <div className="flex border-b border-gray-200 dark:border-gray-700 mb-2">
               <button
                 onClick={() => setActiveMenu('map')}
                 className={`flex-1 py-2 text-sm font-medium ${

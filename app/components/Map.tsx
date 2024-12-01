@@ -53,12 +53,22 @@ const MAP_LAYERS: MapLayer[] = [
   }
 ]
 
+// Ajoutez ce type pour les modes de transport
+type TransportMode = 'car' | 'foot' | 'bike';
+
 export default function Map() {
   const [map, setMap] = useState<L.Map | null>(null)
   const [routingControl, setRoutingControl] = useState<any>(null)
   const [markers, setMarkers] = useState<L.Marker[]>([])
   const [userMarker, setUserMarker] = useState<L.Marker | null>(null)
   const [currentLayer, setCurrentLayer] = useState<L.TileLayer | null>(null)
+  const [routeInfo, setRouteInfo] = useState<{
+    distance: string;
+    duration: string;
+    isVisible: boolean;
+    mode: TransportMode;
+  } | null>(null);
+  const [activeTransportMode, setActiveTransportMode] = useState<TransportMode>('car');
 
   // Gestion du zoom
   useEffect(() => {
@@ -416,44 +426,12 @@ export default function Map() {
           map.removeControl(routingControl)
         }
 
-        const newRoutingControl = (L as any).Routing.control({
-          waypoints: [
-            L.latLng(userLat, userLng),
-            L.latLng(lat, lng)
-          ],
-          routeWhileDragging: true,
-          lineOptions: {
-            styles: [{ color: '#4A90E2', weight: 4 }]
-          },
-          show: false,
-          addWaypoints: false,
-          draggableWaypoints: false,
-          fitSelectedRoutes: true
-        }).addTo(map)
-
-        setRoutingControl(newRoutingControl)
-      })
-    }
-
-    window.addEventListener('showRoute', handleShowRoute)
-    return () => window.removeEventListener('showRoute', handleShowRoute)
-  }, [map, routingControl])
-
-  // Ajouter ce useEffect pour gérer le centrage sur un lieu
-  useEffect(() => {
-    if (!map) return
-
-    const handleCenterOnLocation = (event: CustomEvent) => {
-      const { lat, lng } = event.detail
-      map.setView([lat, lng], 17) // Zoom plus proche pour bien voir le lieu
-
-      // Optionnel : Ajouter un marqueur temporaire avec animation
-      const marker = L.marker([lat, lng], {
-        icon: L.divIcon({
+        // Icône pour la position de l'utilisateur (départ)
+        const startIcon = L.divIcon({
           className: 'custom-div-icon',
           html: `
             <div style="
-              background-color: #4A90E2;
+              background-color: #22C55E;
               width: 12px;
               height: 12px;
               border-radius: 50%;
@@ -468,19 +446,115 @@ export default function Map() {
               width: 24px;
               height: 24px;
               border-radius: 50%;
-              border: 2px solid #4A90E2;
+              border: 2px solid #22C55E;
               animation: pulse 2s infinite;
             "></div>
           `,
           iconSize: [24, 24],
           iconAnchor: [12, 12]
-        })
-      }).addTo(map)
+        });
 
-      // Supprimer le marqueur après quelques secondes
-      setTimeout(() => {
-        marker.remove()
-      }, 3000)
+        // Icône pour la destination
+        const destinationIcon = L.divIcon({
+          className: 'custom-div-icon',
+          html: `
+            <div style="
+              background-color: #EF4444;
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              border: 2px solid #FFFFFF;
+              box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            "></div>
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              border: 2px solid #EF4444;
+              animation: pulse 2s infinite;
+            "></div>
+          `,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        const newRoutingControl = (L as any).Routing.control({
+          waypoints: [
+            L.latLng(userLat, userLng),
+            L.latLng(lat, lng)
+          ],
+          routeWhileDragging: true,
+          lineOptions: {
+            styles: [{ color: '#4A90E2', weight: 4 }]
+          },
+          router: (L as any).Routing.osrmv1({
+            profile: activeTransportMode === 'car' ? 'driving' : 
+                    activeTransportMode === 'bike' ? 'cycling' : 
+                    'walking'
+          }),
+          show: false,
+          addWaypoints: false,
+          draggableWaypoints: false,
+          fitSelectedRoutes: true,
+          createMarker: function(i: number, waypoint: any) {
+            return L.marker(waypoint.latLng, { 
+              icon: i === 0 ? startIcon : destinationIcon 
+            });
+          }
+        }).addTo(map);
+
+        // Écouter les événements de route
+        newRoutingControl.on('routesfound', (e: any) => {
+          const routes = e.routes;
+          const route = routes[0]; // Premier itinéraire
+
+          // Convertir la distance en km si > 1000m
+          const distance = route.summary.totalDistance > 1000
+            ? `${(route.summary.totalDistance / 1000).toFixed(1)} km`
+            : `${route.summary.totalDistance} m`;
+
+          // Convertir la durée en minutes
+          const duration = Math.round(route.summary.totalTime / 60);
+          
+          // Mettre à jour les informations d'itinéraire
+          setRouteInfo({
+            distance,
+            duration: `${duration} min`,
+            isVisible: true,
+            mode: 'car'
+          });
+        });
+
+        setRoutingControl(newRoutingControl)
+      })
+    }
+
+    window.addEventListener('showRoute', handleShowRoute)
+    return () => window.removeEventListener('showRoute', handleShowRoute)
+  }, [map, routingControl])
+
+  // Ajouter ce useEffect pour gérer le centrage sur un lieu
+  useEffect(() => {
+    if (!map) return
+
+    const handleCenterOnLocation = (event: CustomEvent) => {
+      const { lat, lng, showPopup } = event.detail
+      map.setView([lat, lng], 17)
+
+      // Trouver le marqueur correspondant aux coordonnées
+      const targetMarker = markers.find(marker => {
+        const position = marker.getLatLng()
+        return position.lat === lat && position.lng === lng
+      })
+
+      // Si on trouve le marqueur et qu'on doit montrer le popup
+      if (targetMarker && showPopup) {
+        targetMarker.openPopup()
+      }
     }
 
     window.addEventListener('centerOnLocation', handleCenterOnLocation as EventListener)
@@ -488,7 +562,7 @@ export default function Map() {
     return () => {
       window.removeEventListener('centerOnLocation', handleCenterOnLocation as EventListener)
     }
-  }, [map])
+  }, [map, markers])
 
   // Fonction pour créer le contenu du popup
   const createPopupContent = (location: any) => {
@@ -566,9 +640,104 @@ export default function Map() {
     `
   }
 
+  useEffect(() => {
+    if (routingControl && map) {
+      // Recalculer l'itinéraire avec le nouveau mode de transport
+      routingControl.getRouter().options.profile = 
+        activeTransportMode === 'car' ? 'driving' : 
+        activeTransportMode === 'bike' ? 'cycling' : 
+        'walking';
+      routingControl.route();
+    }
+  }, [activeTransportMode, routingControl, map]);
+
+  // Ajoutez cette fonction de fermeture
+  const closeRouteInfo = () => {
+    setRouteInfo(null);
+    if (routingControl && map) {
+      map.removeControl(routingControl);
+      setRoutingControl(null);
+    }
+  };
+
   return (
     <div className="relative h-full w-full">
       <div id="map" className="h-full w-full z-0" />
+      
+      {/* Menu d'informations d'itinéraire */}
+      {routeInfo && routeInfo.isVisible && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 z-10">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  {routeInfo.distance}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  {routeInfo.duration}
+                </span>
+              </div>
+              <button
+                onClick={closeRouteInfo}
+                className="ml-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setActiveTransportMode('car')}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-1 rounded text-xs ${
+                  activeTransportMode === 'car'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                </svg>
+                Voiture
+              </button>
+              <button
+                onClick={() => setActiveTransportMode('foot')}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-1 rounded text-xs ${
+                  activeTransportMode === 'foot'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14h.01M16 17l-4-4-4 4M4 17l4-4" />
+                </svg>
+                À pied
+              </button>
+              <button
+                onClick={() => setActiveTransportMode('bike')}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-1 rounded text-xs ${
+                  activeTransportMode === 'bike'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16a3 3 0 100-6 3 3 0 000 6zM7 16a3 3 0 100-6 3 3 0 000 6zM7 13h10" />
+                </svg>
+                Vélo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
