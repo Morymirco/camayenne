@@ -33,6 +33,13 @@ type UserProfile = {
   photoURL?: string
 }
 
+type Filter = {
+  id: string;
+  label: string;
+  type: string;
+  checked: boolean;
+}
+
 const Sidebar = () => {
   const { user, logout } = useAuth()
   const { showAlert } = useAlert()
@@ -41,12 +48,13 @@ const Sidebar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLayer, setSelectedLayer] = useState('dark') // Couche par défaut
-  const [filters, setFilters] = useState<FilterOption[]>([
-    { id: 'restaurants', label: 'Restaurants', checked: false },
-    { id: 'hotels', label: 'Hôtels', checked: false },
-    { id: 'pharmacies', label: 'Pharmacies', checked: false },
-    { id: 'ecoles', label: 'Écoles', checked: false },
-    { id: 'banques', label: 'Banques', checked: false },
+  const [filters, setFilters] = useState<Filter[]>([
+    { id: 'restaurant', label: 'Restaurants', type: 'restaurant', checked: true },
+    { id: 'hotel', label: 'Hôtels', type: 'hotel', checked: true },
+    { id: 'pharmacie', label: 'Pharmacies', type: 'pharmacie', checked: true },
+    { id: 'ecole', label: 'Écoles', type: 'ecole', checked: true },
+    { id: 'banque', label: 'Banques', type: 'banque', checked: true },
+    { id: 'magasin', label: 'Magasins', type: 'magasin', checked: true },
   ])
   const [currentZoom, setCurrentZoom] = useState(15)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -64,18 +72,22 @@ const Sidebar = () => {
   }
 
   const handleFilterChange = (filterId: string) => {
-    const newFilters = filters.map(filter => 
-      filter.id === filterId ? { ...filter, checked: !filter.checked } : filter
-    )
-    setFilters(newFilters)
-    
-    // Émettre l'événement de changement de filtre
-    window.dispatchEvent(new CustomEvent('filterChange', {
-      detail: {
-        filterId,
-        checked: !filters.find(f => f.id === filterId)?.checked
+    const updatedFilters = filters.map(filter => {
+      if (filter.id === filterId) {
+        return { ...filter, checked: !filter.checked };
       }
-    }))
+      return filter;
+    });
+    setFilters(updatedFilters);
+
+    // Émettre un événement pour la carte avec les types actifs
+    const activeTypes = updatedFilters
+      .filter(f => f.checked)
+      .map(f => f.type);
+
+    window.dispatchEvent(new CustomEvent('filterLocations', {
+      detail: { activeTypes }
+    }));
   }
 
   const handleLayerChange = (layerId: string) => {

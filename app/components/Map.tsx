@@ -660,6 +660,33 @@ export default function Map() {
     }
   };
 
+  // Dans le useEffect principal, ajoutez l'écouteur d'événements pour les filtres
+  useEffect(() => {
+    if (!map) return;
+
+    const handleFilterLocations = (event: CustomEvent) => {
+      const { activeTypes } = event.detail;
+      
+      // Parcourir tous les marqueurs et les afficher/masquer selon les filtres
+      markers.forEach(marker => {
+        const location = marker.getElement()?.dataset?.type;
+        if (location) {
+          if (activeTypes.includes(location)) {
+            marker.addTo(map);
+          } else {
+            marker.remove();
+          }
+        }
+      });
+    };
+
+    window.addEventListener('filterLocations', handleFilterLocations as EventListener);
+
+    return () => {
+      window.removeEventListener('filterLocations', handleFilterLocations as EventListener);
+    };
+  }, [map, markers]);
+
   return (
     <div className="relative h-full w-full">
       <div id="map" className="h-full w-full z-0" />
