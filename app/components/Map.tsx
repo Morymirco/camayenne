@@ -56,6 +56,12 @@ const MAP_LAYERS: MapLayer[] = [
 // Ajoutez ce type pour les modes de transport
 type TransportMode = 'car' | 'foot' | 'bike';
 
+declare module 'leaflet' {
+  interface MarkerOptions {
+    type?: string;
+  }
+}
+
 export default function Map() {
   const [map, setMap] = useState<L.Map | null>(null)
   const [routingControl, setRoutingControl] = useState<any>(null)
@@ -184,8 +190,10 @@ export default function Map() {
             iconAnchor: [12, 12]
           })
 
-          const marker = L.marker([location.latitude, location.longitude], { icon })
-            .addTo(mapInstance)
+          const marker = L.marker([location.latitude, location.longitude], { 
+            icon,
+            type: location.type
+          }).addTo(mapInstance)
 
           // Ajouter le popup
           marker.bindPopup(createPopupContent(location), {
@@ -667,11 +675,10 @@ export default function Map() {
     const handleFilterLocations = (event: CustomEvent) => {
       const { activeTypes } = event.detail;
       
-      // Parcourir tous les marqueurs et les afficher/masquer selon les filtres
       markers.forEach(marker => {
-        const location = marker.getElement()?.dataset?.type;
-        if (location) {
-          if (activeTypes.includes(location)) {
+        const locationType = marker.options.type;
+        if (locationType) {
+          if (activeTypes.includes(locationType)) {
             marker.addTo(map);
           } else {
             marker.remove();
