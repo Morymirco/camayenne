@@ -7,6 +7,10 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useState } from 'react'
 import { getMarkerIcon } from './MapMarkers'
+import dynamic from 'next/dynamic'
+
+// Chargement dynamique du VRViewer pour éviter les problèmes de SSR
+const VRViewer = dynamic(() => import('./VRViewer'), { ssr: false })
 
 // Coordonnées du centre de Camayenne
 const CAMAYENNE_CENTER: [number, number] = [9.5370, -13.6785]
@@ -75,6 +79,13 @@ export default function Map() {
     mode: TransportMode;
   } | null>(null);
   const [activeTransportMode, setActiveTransportMode] = useState<TransportMode>('car');
+  const [vrViewerState, setVrViewerState] = useState<{
+    isOpen: boolean;
+    modelPath: string;
+  }>({
+    isOpen: false,
+    modelPath: ''
+  });
 
   // Gestion du zoom
   useEffect(() => {
@@ -640,7 +651,7 @@ export default function Map() {
               }))'
               class="bg-gray-700 text-white px-3 py-1 rounded-full text-xs hover:bg-gray-600 transition-colors flex-1"
             >
-              Plus de détails
+              Voir en réalité virtuelle
             </button>
           </div>
         </div>
@@ -693,6 +704,21 @@ export default function Map() {
       window.removeEventListener('filterLocations', handleFilterLocations as EventListener);
     };
   }, [map, markers]);
+
+  useEffect(() => {
+    const handleShowVR = (event: CustomEvent) => {
+      const location = event.detail;
+      setVrViewerState({
+        isOpen: true,
+        modelPath: '/models/scene.glb' // Chemin vers votre fichier .glb
+      });
+    };
+
+    window.addEventListener('showLocationDetails', handleShowVR as EventListener);
+    return () => {
+      window.removeEventListener('showLocationDetails', handleShowVR as EventListener);
+    };
+  }, []);
 
   return (
     <div className="relative h-full w-full">
@@ -771,6 +797,13 @@ export default function Map() {
             </div>
           </div>
         </div>
+      )}
+      
+      {vrViewerState.isOpen && (
+        <VRViewer
+          modelPath={vrViewerState.modelPath}
+          onClose={() => setVrViewerState({ isOpen: false, modelPath: '' })}
+        />
       )}
     </div>
   )
