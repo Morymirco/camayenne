@@ -123,6 +123,11 @@ const Sidebar = () => {
     window.dispatchEvent(new CustomEvent('showLocationDetails', {
       detail: location
     }))
+
+    // Fermer le sidebar sur mobile
+    if (window.innerWidth < 768) {
+      setIsMobileMenuOpen(false)
+    }
   }
 
   useEffect(() => {
@@ -229,7 +234,7 @@ const Sidebar = () => {
 
           {/* Barre de recherche - réduire la marge */}
           <div className="mb-3">
-            <SearchBar onLocationSelect={(location) => handleMobileClick(() => handleLocationSelect(location))} />
+            <SearchBar onLocationSelect={handleLocationSelect} />
           </div>
 
           {/* Menu principal avec onglets - réduire la marge */}

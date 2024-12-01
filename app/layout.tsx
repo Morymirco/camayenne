@@ -34,6 +34,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
   },
+  icons: {
+    icon: '/logoC.png',
+    apple: '/logoC.png',
+  },
 };
 
 export default function RootLayout({
@@ -48,7 +52,8 @@ export default function RootLayout({
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossOrigin=""/>
           {/* favicon */}
-          <link rel="icon" href="/3d-map.png" />
+          <link rel="icon" href="/logoC.png" />
+          <link rel="apple-touch-icon" href="/logoC.png" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossOrigin=""></script>
