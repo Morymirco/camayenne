@@ -439,6 +439,57 @@ export default function Map() {
     return () => window.removeEventListener('showRoute', handleShowRoute)
   }, [map, routingControl])
 
+  // Ajouter ce useEffect pour gérer le centrage sur un lieu
+  useEffect(() => {
+    if (!map) return
+
+    const handleCenterOnLocation = (event: CustomEvent) => {
+      const { lat, lng } = event.detail
+      map.setView([lat, lng], 17) // Zoom plus proche pour bien voir le lieu
+
+      // Optionnel : Ajouter un marqueur temporaire avec animation
+      const marker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'custom-div-icon',
+          html: `
+            <div style="
+              background-color: #4A90E2;
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              border: 2px solid #FFFFFF;
+              box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            "></div>
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              border: 2px solid #4A90E2;
+              animation: pulse 2s infinite;
+            "></div>
+          `,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        })
+      }).addTo(map)
+
+      // Supprimer le marqueur après quelques secondes
+      setTimeout(() => {
+        marker.remove()
+      }, 3000)
+    }
+
+    window.addEventListener('centerOnLocation', handleCenterOnLocation as EventListener)
+
+    return () => {
+      window.removeEventListener('centerOnLocation', handleCenterOnLocation as EventListener)
+    }
+  }, [map])
+
   // Fonction pour créer le contenu du popup
   const createPopupContent = (location: any) => {
     return `

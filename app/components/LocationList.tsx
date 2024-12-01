@@ -7,7 +7,7 @@ import { getLocations } from '@/app/services/firebase/locations'
 import type { Location } from '@/app/types/location'
 import Image from 'next/image'
 import { useEffect, useState, useRef } from 'react'
-import { FiClock, FiHeart, FiMapPin, FiPhone, FiPlus, FiStar } from 'react-icons/fi'
+import { FiClock, FiHeart, FiMapPin, FiPhone, FiPlus, FiStar, FiMap } from 'react-icons/fi'
 import LocationDetails from './LocationDetails'
 
 // Images de démonstration depuis Unsplash
@@ -306,13 +306,17 @@ export default function LocationList() {
             {/* Boutons d'action */}
             <div className="flex gap-2 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
               <button 
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleLocationClick(location)
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('centerOnLocation', {
+                    detail: {
+                      lat: location.latitude,
+                      lng: location.longitude
+                    }
+                  }))
                 }}
-                className="flex-1 flex items-center justify-center px-2 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                className="flex items-center px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
               >
-                <FiMapPin className="w-3 h-3 mr-1" />
+                <FiMap className="w-4 h-4 mr-1" />
                 Voir sur la carte
               </button>
               <button

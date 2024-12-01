@@ -298,6 +298,26 @@ const Sidebar = () => {
                             <FiNavigation className="mr-2" />
                             Mode suivi
                           </button>
+
+                          <div className="px-3 py-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Zoom actuel: {currentZoom}x
+                            </p>
+                            <div className="mt-2 flex gap-2">
+                              <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('zoomIn'))}
+                                className="flex-1 px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                              >
+                                Zoom +
+                              </button>
+                              <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('zoomOut'))}
+                                className="flex-1 px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                              >
+                                Zoom -
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </li>
@@ -344,26 +364,48 @@ const Sidebar = () => {
                       </button>
                       {activeMenu === 'layers' && (
                         <div className="ml-8 mt-2 space-y-2">
-                          {layers.map(layer => (
-                            <label key={layer.id} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer group">
-                              <div className="relative">
-                                <input
-                                  type="radio"
-                                  name="mapLayer"
-                                  value={layer.id}
-                                  checked={selectedLayer === layer.id}
-                                  onChange={() => handleLayerChange(layer.id)}
-                                  className="sr-only peer"
-                                />
-                                <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-full peer-checked:border-blue-500 transition-all">
-                                  <div className={`w-3 h-3 m-[3px] rounded-full transition-all ${selectedLayer === layer.id ? 'bg-blue-500' : 'bg-transparent'}`} />
-                                </div>
-                              </div>
-                              <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200">
-                                {layer.label}
-                              </span>
-                            </label>
-                          ))}
+                          <div className="flex gap-2 flex-wrap">
+                            <button
+                              onClick={() => window.dispatchEvent(new CustomEvent('changeMapLayer', {
+                                detail: { layerId: 'standard' }
+                              }))}
+                              className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                            >
+                              Standard
+                            </button>
+                            <button
+                              onClick={() => window.dispatchEvent(new CustomEvent('changeMapLayer', {
+                                detail: { layerId: 'dark' }
+                              }))}
+                              className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                            >
+                              Sombre
+                            </button>
+                            <button
+                              onClick={() => window.dispatchEvent(new CustomEvent('changeMapLayer', {
+                                detail: { layerId: 'satellite' }
+                              }))}
+                              className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                            >
+                              Satellite
+                            </button>
+                            <button
+                              onClick={() => window.dispatchEvent(new CustomEvent('changeMapLayer', {
+                                detail: { layerId: 'terrain' }
+                              }))}
+                              className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                            >
+                              Terrain
+                            </button>
+                            <button
+                              onClick={() => window.dispatchEvent(new CustomEvent('changeMapLayer', {
+                                detail: { layerId: 'traffic' }
+                              }))}
+                              className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                            >
+                              Trafic
+                            </button>
+                          </div>
                         </div>
                       )}
                     </li>
