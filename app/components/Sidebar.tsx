@@ -124,7 +124,7 @@ const Sidebar = () => {
       detail: location
     }))
 
-    // Fermer le sidebar sur mobile
+    // Fermer le sidebar sur mobile UNIQUEMENT après la sélection d'un lieu
     if (window.innerWidth < 768) {
       setIsMobileMenuOpen(false)
     }
@@ -208,7 +208,12 @@ const Sidebar = () => {
       {isMobileMenuOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={(e) => {
+            // Ne fermer que si on clique sur l'overlay lui-même
+            if (e.target === e.currentTarget) {
+              setIsMobileMenuOpen(false)
+            }
+          }}
         />
       )}
 
@@ -233,7 +238,7 @@ const Sidebar = () => {
           </div>
 
           {/* Barre de recherche - réduire la marge */}
-          <div className="mb-3">
+          <div className="mb-3" onClick={(e) => e.stopPropagation()}>
             <SearchBar onLocationSelect={handleLocationSelect} />
           </div>
 
